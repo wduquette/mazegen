@@ -37,7 +37,7 @@ impl Grid {
             let j = grid.j(cell);
 
             let north = if i > 0 {
-                Some(dbg!(grid.cell(i - 1,j)))
+                Some(grid.cell(i - 1,j))
             } else {
                 None
             };
@@ -107,7 +107,9 @@ impl Grid {
     }
 
     // Links cell 1 to cell 2.
-    // The presumption is that the cells are adjacent.
+    // TODO: The linked cells should always be adjacent; but this implementation doesn't
+    // require it.  Later in the book, the author talks about "braiding"; possibly,
+    // braiding involves non-adjacent links.
     pub fn link(&mut self, cell1: Cell, cell2: Cell) {
         assert!(self.contains(cell1));
         assert!(self.contains(cell2));
@@ -171,12 +173,87 @@ impl Grid {
         assert!(self.contains(cell));
         self.cells[cell].west
     }
+
+    /// Indicates whether this cell is linked to the cell to its north.
+    /// Returns false if there is no cell to the north.
+    pub fn is_linked_north(&self, cell: Cell) -> bool {
+        assert!(self.contains(cell));
+        if let Some(other) = self.cells[cell].north {
+            self.cells[cell].links.contains(&other)
+        } else {
+            false
+        }
+    }
+
+    /// Indicates whether this cell is linked to the cell to its south.
+    /// Returns false if there is no cell to the south.
+    pub fn is_linked_south(&self, cell: Cell) -> bool {
+        assert!(self.contains(cell));
+        if let Some(other) = self.cells[cell].south {
+            self.cells[cell].links.contains(&other)
+        } else {
+            false
+        }
+    }
+
+    /// Indicates whether this cell is linked to the cell to its east.
+    /// Returns false if there is no cell to the east.
+    pub fn is_linked_east(&self, cell: Cell) -> bool {
+        assert!(self.contains(cell));
+        if let Some(other) = self.cells[cell].east {
+            self.cells[cell].links.contains(&other)
+        } else {
+            false
+        }
+    }
+
+    /// Indicates whether this cell is linked to the cell to its west.
+    /// Returns false if there is no cell to the west.
+    pub fn is_linked_west(&self, cell: Cell) -> bool {
+        assert!(self.contains(cell));
+        if let Some(other) = self.cells[cell].west {
+            self.cells[cell].links.contains(&other)
+        } else {
+            false
+        }
+    }
 }
 
+// Output the maze dimensions and the maze itself using simply ASCII graphics.
 impl Display for Grid {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "Grid({}x{}={})", self.num_rows, self.num_cols, self.num_cells)
-        // TODO
+        writeln!(f, "Grid({}x{})", self.num_rows, self.num_cols)?;
+
+        write!(f, "+")?;
+        for _ in 0..self.num_cols() {
+            write!(f, "---+")?;
+        }
+
+        for i in 0..self.num_rows() {
+            writeln!(f)?;
+            write!(f, "|")?;
+            for j in 0..self.num_cols() {
+                let cell = self.cell(i,j);
+                if self.is_linked_east(cell) {
+                    write!(f, "    ")?;
+                } else {
+                    write!(f, "   |")?;
+                }
+            }
+
+            writeln!(f)?;
+            write!(f, "+")?;
+            for j in 0..self.num_cols() {
+                let cell = self.cell(i,j);
+                if self.is_linked_south(cell) {
+                    write!(f, "   +")?;
+                } else {
+                    write!(f, "---+")?;
+                }
+            }
+        }
+
+        writeln!(f)
     }
 }
 
@@ -337,6 +414,36 @@ mod tests {
                 grid.unlink(c1, c2);
                 assert!(!grid.is_linked(c1, c2));
                 assert!(!grid.is_linked(c2, c1));
+            }
+        }
+    }
+
+    #[test]
+    fn test_grid_is_linked_direction() {
+        let mut grid = Grid::new(5,6);
+
+        // Add north, south, east, and west links.
+        let cell = grid.cell(3,3);
+        grid.link(cell, grid.north_of(cell).unwrap());
+        grid.link(cell, grid.south_of(cell).unwrap());
+        grid.link(cell, grid.east_of(cell).unwrap());
+        grid.link(cell, grid.west_of(cell).unwrap());
+
+        for c in 0..grid.num_cells() {
+            if let Some(other) = grid.north_of(c) {
+                assert_eq!(grid.is_linked_north(c), grid.is_linked(c, other));
+            }
+
+            if let Some(other) = grid.south_of(c) {
+                assert_eq!(grid.is_linked_south(c), grid.is_linked(c, other));
+            }
+
+            if let Some(other) = grid.east_of(c) {
+                assert_eq!(grid.is_linked_east(c), grid.is_linked(c, other));
+            }
+
+            if let Some(other) = grid.west_of(c) {
+                assert_eq!(grid.is_linked_west(c), grid.is_linked(c, other));
             }
         }
     }
