@@ -1,11 +1,12 @@
-use std::fmt::Display;
+use rand::{thread_rng, Rng};
 use std::collections::HashSet;
+use std::fmt::Display;
 
 pub fn hello() {
     println!("Hello, world!");
 }
 
-#[derive(Debug,PartialEq,Eq,Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Grid {
     num_rows: usize,
     num_cols: usize,
@@ -37,7 +38,7 @@ impl Grid {
             let j = grid.j(cell);
 
             let north = if i > 0 {
-                Some(grid.cell(i - 1,j))
+                Some(grid.cell(i - 1, j))
             } else {
                 None
             };
@@ -217,6 +218,13 @@ impl Grid {
             false
         }
     }
+
+    /// Returns the grid to its initial state:  no cell is linked to any other cell.
+    pub fn clear(&mut self) {
+        for c in 0..self.num_cells {
+            self.cells[c].links.clear();
+        }
+    }
 }
 
 // Output the maze dimensions and the maze itself using simply ASCII graphics.
@@ -233,7 +241,7 @@ impl Display for Grid {
             writeln!(f)?;
             write!(f, "|")?;
             for j in 0..self.num_cols() {
-                let cell = self.cell(i,j);
+                let cell = self.cell(i, j);
                 if self.is_linked_east(cell) {
                     write!(f, "    ")?;
                 } else {
@@ -244,7 +252,7 @@ impl Display for Grid {
             writeln!(f)?;
             write!(f, "+")?;
             for j in 0..self.num_cols() {
-                let cell = self.cell(i,j);
+                let cell = self.cell(i, j);
                 if self.is_linked_south(cell) {
                     write!(f, "   +")?;
                 } else {
@@ -257,7 +265,7 @@ impl Display for Grid {
     }
 }
 
-#[derive(Debug,PartialEq,Eq,Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 struct CellData {
     cell: Cell,
     links: HashSet<Cell>,
@@ -301,6 +309,67 @@ impl CellData {
     }
 }
 
+pub fn binary_tree_maze(grid: &mut Grid) {
+    for cell in 0..grid.num_cells() {
+        let mut neighbors = Vec::new();
+
+        if let Some(ncell) = grid.north_of(cell) {
+            neighbors.push(ncell);
+        }
+
+        if let Some(ecell) = grid.east_of(cell) {
+            neighbors.push(ecell);
+        }
+
+        if !neighbors.is_empty() {
+            grid.link(cell, sample(&neighbors));
+        }
+    }
+}
+
+pub fn sidewinder_maze(grid: &mut Grid) {
+    for i in 0..grid.num_rows() {
+        let mut run = Vec::new();
+
+        for j in 0..grid.num_cols() {
+            let cell = grid.cell(i, j);
+            run.push(cell);
+
+            let at_eastern_boundary = grid.east_of(cell).is_none();
+            let at_northern_boundary = grid.north_of(cell).is_none();
+            let should_close_out = at_eastern_boundary ||
+                (!at_northern_boundary && !flip());
+
+            if should_close_out {
+                let member = sample(&run);
+                if let Some(ncell) = grid.north_of(member) {
+                    grid.link(member, ncell);
+                }
+                run.clear();
+            } else {
+                grid.link(cell, grid.east_of(cell).expect("a cell"));
+            }
+        }
+    }
+}
+
+pub fn sample(vec: &[Cell]) -> Cell {
+    assert!(!vec.is_empty());
+
+    if vec.len() == 1 {
+        return vec[0];
+    }
+
+    let mut rng = thread_rng();
+    let ind: usize = rng.gen_range(0, vec.len());
+    vec[ind]
+}
+
+// Flips a coin, returning true/false
+pub fn flip() -> bool {
+    thread_rng().gen_bool(0.5)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -316,19 +385,19 @@ mod tests {
 
     #[test]
     fn test_grid_cell() {
-        let grid = Grid::new(5,6);
+        let grid = Grid::new(5, 6);
 
-        assert_eq!(grid.cell(0,0), 0);
-        assert_eq!(grid.cell(0,3), 3);
-        assert_eq!(grid.cell(1,0), 6);
-        assert_eq!(grid.cell(1,3), 9);
-        assert_eq!(grid.cell(2,0), 12);
-        assert_eq!(grid.cell(4,5), grid.num_cells() - 1);
+        assert_eq!(grid.cell(0, 0), 0);
+        assert_eq!(grid.cell(0, 3), 3);
+        assert_eq!(grid.cell(1, 0), 6);
+        assert_eq!(grid.cell(1, 3), 9);
+        assert_eq!(grid.cell(2, 0), 12);
+        assert_eq!(grid.cell(4, 5), grid.num_cells() - 1);
     }
 
     #[test]
     fn test_grid_i_j() {
-        let grid = Grid::new(5,6);
+        let grid = Grid::new(5, 6);
 
         assert_eq!(grid.i(0), 0);
         assert_eq!(grid.j(0), 0);
@@ -345,7 +414,7 @@ mod tests {
 
     #[test]
     fn test_grid_cell_i_j() {
-        let grid = Grid::new(5,6);
+        let grid = Grid::new(5, 6);
 
         for i in 0..grid.num_rows() {
             for j in 0..grid.num_cols() {
@@ -359,7 +428,7 @@ mod tests {
 
     #[test]
     fn test_grid_neighbors() {
-        let grid = Grid::new(5,6);
+        let grid = Grid::new(5, 6);
 
         for cell in 0..grid.num_cells() {
             let mut count = 0;
@@ -395,7 +464,7 @@ mod tests {
 
     #[test]
     fn test_grid_linking() {
-        let mut grid = Grid::new(5,6);
+        let mut grid = Grid::new(5, 6);
 
         // Initially, no cells are linked.
         for c1 in 0..grid.num_cells {
@@ -420,10 +489,10 @@ mod tests {
 
     #[test]
     fn test_grid_is_linked_direction() {
-        let mut grid = Grid::new(5,6);
+        let mut grid = Grid::new(5, 6);
 
         // Add north, south, east, and west links.
-        let cell = grid.cell(3,3);
+        let cell = grid.cell(3, 3);
         grid.link(cell, grid.north_of(cell).unwrap());
         grid.link(cell, grid.south_of(cell).unwrap());
         grid.link(cell, grid.east_of(cell).unwrap());
