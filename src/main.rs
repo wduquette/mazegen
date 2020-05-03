@@ -10,5 +10,5 @@ fn main() {
     println!("Made {}", grid);
 
     let image = grid.to_image();
-    raster::save(&image, "temp.png").unwrap();
+    image.save("temp.png").unwrap();
 }

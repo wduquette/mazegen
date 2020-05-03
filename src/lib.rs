@@ -1,4 +1,5 @@
-use raster::{Image, Color};
+use image::RgbImage;
+use image::ImageBuffer;
 use rand::{thread_rng, Rng};
 use std::collections::HashSet;
 use std::fmt::Display;
@@ -227,56 +228,58 @@ impl Grid {
         }
     }
 
-    pub fn to_image(&self) -> Image {
+    pub fn to_image(&self) -> RgbImage {
         // FIRST, size and create the image
-        let size: i32 = 10;
-        let width = 1 + size*self.num_cols() as i32;
-        let height = 1 + size*self.num_rows() as i32;
+        let size: u32 = 10;
+        let width = 1 + size*self.num_cols() as u32;
+        let height = 1 + size*self.num_rows() as u32;
 
-        let mut image = Image::blank(width, height);
+        let mut image: RgbImage = ImageBuffer::new(width, height);
+        let black = image::Rgb([0, 0, 0]);
+        let white = image::Rgb([255, 255, 255]);
 
         // NEXT, clear the image to white.
-        for y in 0..image.height {
-            for x in 0..image.width {
+        for y in 0..height {
+            for x in 0..width {
                 // NOTE: set_pixel returns an error result if the coordinates are out of bounds.
                 // That should probably be a panic instead, since there's no excuse for it.
                 // NOTE: set_pixel takes a Color, not &Color; and Color isn't Copy.
                 // Consequently you need to create a new Color for each pixel.  Derpy.
-                image.set_pixel(x, y, Color::white()).unwrap();
+                image.put_pixel(x, y, white);
             }
         }
 
         // NEXT, draw the top and left lines, and the intersection points
-        for x in 0..image.width {
-            image.set_pixel(x, 0, Color::black()).unwrap();
+        for x in 0..width {
+            image.put_pixel(x, 0, black);
         }
-        for y in 0..image.height {
-            image.set_pixel(0, y, Color::black()).unwrap();
+        for y in 0..height {
+            image.put_pixel(0, y, black);
         }
-        for y in (size..image.height).step_by(size as usize) {
-            for x in (size..image.width).step_by(size as usize) {
-                image.set_pixel(x, y, Color::black()).unwrap();
+        for y in (size..height).step_by(size as usize) {
+            for x in (size..width).step_by(size as usize) {
+                image.put_pixel(x, y, black);
             }
         }
 
         // NEXT, draw the east and south borders for each cell.
         for i in 0..self.num_rows() {
-            let y = size*i as i32;
+            let y = size*i as u32;
             for j in 0..self.num_cols() {
                 let cell = self.cell(i, j);
-                let x = size*j as i32;
+                let x = size*j as u32;
 
                 // Draw east border
                 if !self.is_linked_east(cell) {
                     for n in y..(y + size) {
-                        image.set_pixel(x + size, n, Color::black()).unwrap();
+                        image.put_pixel(x + size, n, black);
                     }
                 }
 
                 // Draw south border
                 if !self.is_linked_south(cell) {
                     for n in x..(x + size) {
-                        image.set_pixel(n, y + size, Color::black()).unwrap();
+                        image.put_pixel(n, y + size, black);
                     }
                 }
             }
