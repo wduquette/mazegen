@@ -230,53 +230,53 @@ impl Grid {
     pub fn to_image(&self) -> Image {
         // FIRST, size and create the image
         let size: i32 = 10;
-        let rpixels = 1 + size*self.num_rows() as i32;
-        let cpixels = 1 + size*self.num_cols() as i32;
+        let width = 1 + size*self.num_cols() as i32;
+        let height = 1 + size*self.num_rows() as i32;
 
-        let mut image = Image::blank(rpixels, cpixels);
+        let mut image = Image::blank(width, height);
 
         // NEXT, clear the image to white.
-        for ip in 0..image.height {
-            for jp in 0..image.width {
+        for y in 0..image.height {
+            for x in 0..image.width {
                 // NOTE: set_pixel returns an error result if the coordinates are out of bounds.
                 // That should probably be a panic instead, since there's no excuse for it.
                 // NOTE: set_pixel takes a Color, not &Color; and Color isn't Copy.
                 // Consequently you need to create a new Color for each pixel.  Derpy.
-                image.set_pixel(ip, jp, Color::white()).unwrap();
+                image.set_pixel(x, y, Color::white()).unwrap();
             }
         }
 
         // NEXT, draw the top and left lines, and the intersection points
-        for jp in 0..image.width {
-            image.set_pixel(0, jp, Color::black()).unwrap();
+        for x in 0..image.width {
+            image.set_pixel(x, 0, Color::black()).unwrap();
         }
-        for ip in 0..image.height {
-            image.set_pixel(ip, 0, Color::black()).unwrap();
+        for y in 0..image.height {
+            image.set_pixel(0, y, Color::black()).unwrap();
         }
-        for ip in (size..image.height).step_by(size as usize) {
-            for jp in (size..image.width).step_by(size as usize) {
-                image.set_pixel(ip, jp, Color::black()).unwrap();
+        for y in (size..image.height).step_by(size as usize) {
+            for x in (size..image.width).step_by(size as usize) {
+                image.set_pixel(x, y, Color::black()).unwrap();
             }
         }
 
         // NEXT, draw the east and south borders for each cell.
         for i in 0..self.num_rows() {
-            let ip = size*i as i32;
+            let y = size*i as i32;
             for j in 0..self.num_cols() {
                 let cell = self.cell(i, j);
-                let jp = size*j as i32;
+                let x = size*j as i32;
 
                 // Draw east border
                 if !self.is_linked_east(cell) {
-                    for n in ip..(ip + size) {
-                        image.set_pixel(n, jp + size, Color::black()).unwrap();
+                    for n in y..(y + size) {
+                        image.set_pixel(x + size, n, Color::black()).unwrap();
                     }
                 }
 
                 // Draw south border
                 if !self.is_linked_south(cell) {
-                    for n in jp..(jp + size) {
-                        image.set_pixel(ip + size, n, Color::black()).unwrap();
+                    for n in x..(x + size) {
+                        image.set_pixel(n, y + size, Color::black()).unwrap();
                     }
                 }
             }
