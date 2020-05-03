@@ -8,4 +8,7 @@ fn main() {
     grid.clear();
     sidewinder_maze(&mut grid);
     println!("Made {}", grid);
+
+    let image = grid.to_image();
+    raster::save(&image, "temp.png").unwrap();
 }

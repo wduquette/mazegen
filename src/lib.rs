@@ -1,3 +1,4 @@
+use raster::{Image, Color};
 use rand::{thread_rng, Rng};
 use std::collections::HashSet;
 use std::fmt::Display;
@@ -224,6 +225,64 @@ impl Grid {
         for c in 0..self.num_cells {
             self.cells[c].links.clear();
         }
+    }
+
+    pub fn to_image(&self) -> Image {
+        // FIRST, size and create the image
+        let size: i32 = 10;
+        let rpixels = 1 + size*self.num_rows() as i32;
+        let cpixels = 1 + size*self.num_cols() as i32;
+
+        let mut image = Image::blank(rpixels, cpixels);
+
+        // NEXT, clear the image to white.
+        for ip in 0..image.height {
+            for jp in 0..image.width {
+                // NOTE: set_pixel returns an error result if the coordinates are out of bounds.
+                // That should probably be a panic instead, since there's no excuse for it.
+                // NOTE: set_pixel takes a Color, not &Color; and Color isn't Copy.
+                // Consequently you need to create a new Color for each pixel.  Derpy.
+                image.set_pixel(ip, jp, Color::white()).unwrap();
+            }
+        }
+
+        // NEXT, draw the top and left lines, and the intersection points
+        for jp in 0..image.width {
+            image.set_pixel(0, jp, Color::black()).unwrap();
+        }
+        for ip in 0..image.height {
+            image.set_pixel(ip, 0, Color::black()).unwrap();
+        }
+        for ip in (size..image.height).step_by(size as usize) {
+            for jp in (size..image.width).step_by(size as usize) {
+                image.set_pixel(ip, jp, Color::black()).unwrap();
+            }
+        }
+
+        // NEXT, draw the east and south borders for each cell.
+        for i in 0..self.num_rows() {
+            let ip = size*i as i32;
+            for j in 0..self.num_cols() {
+                let cell = self.cell(i, j);
+                let jp = size*j as i32;
+
+                // Draw east border
+                if !self.is_linked_east(cell) {
+                    for n in ip..(ip + size) {
+                        image.set_pixel(n, jp + size, Color::black()).unwrap();
+                    }
+                }
+
+                // Draw south border
+                if !self.is_linked_south(cell) {
+                    for n in jp..(jp + size) {
+                        image.set_pixel(ip + size, n, Color::black()).unwrap();
+                    }
+                }
+            }
+        }
+
+        image
     }
 }
 
