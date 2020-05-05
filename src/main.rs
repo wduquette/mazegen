@@ -31,12 +31,7 @@ pub fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResul
     // Correct number of arguments?
     check_args(1, argv, 1, 1, "")?;
 
-    let mut grid = Grid::new(10, 20);
-    mazegen::sidewinder_maze(&mut grid);
-    let image = grid.to_image();
-    image.save("temp.png").unwrap();
-
-    molt_ok!(grid.to_string())
+    molt_ok!("did it")
 }
 
 pub fn cmd_grid(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
@@ -62,33 +57,46 @@ pub fn cmd_grid(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult
     molt_ok!(name)
 }
 
-pub fn obj_grid(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+fn obj_grid(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     interp.call_subcommand(ctx, argv, 1, &GRID_SUBCOMMANDS)
 }
 
-const GRID_SUBCOMMANDS: [Subcommand; 3] = [
+const GRID_SUBCOMMANDS: [Subcommand; 4] = [
     Subcommand("text", obj_grid_text),
     Subcommand("rows", obj_grid_rows),
     Subcommand("cols", obj_grid_cols),
+    Subcommand("render", obj_grid_render),
 ];
 
-pub fn obj_grid_text(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+fn obj_grid_text(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(2, argv, 2, 2, "")?;
     let grid = interp.context::<Grid>(ctx);
     molt_ok!(grid.to_string())
 }
 
-pub fn obj_grid_rows(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+fn obj_grid_rows(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(2, argv, 2, 2, "")?;
     let grid = interp.context::<Grid>(ctx);
     molt_ok!(grid.num_rows() as MoltInt)
 }
 
-pub fn obj_grid_cols(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+fn obj_grid_cols(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(2, argv, 2, 2, "")?;
     let grid = interp.context::<Grid>(ctx);
     molt_ok!(grid.num_cols() as MoltInt)
+}
+
+fn obj_grid_render(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 3, 3, "filename")?;
+    let filename = argv[2].as_str();
+    let grid = interp.context::<Grid>(ctx);
+    let image = grid.to_image();
+    match image.save(filename) {
+        Ok(_) => molt_ok!(),
+        Err(_) => molt_err!("error saving grid image")
+    }
 }
