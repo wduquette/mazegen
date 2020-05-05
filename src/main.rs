@@ -15,6 +15,7 @@ fn main() {
     let mut interp = Interp::new();
     interp.add_command("doit", cmd_doit);
     interp.add_command("grid", cmd_grid);
+    interp.add_command("maze", cmd_maze);
 
     // Install a Molt extension crate
     // molt_sample::install(&mut interp).expect("Could not install.");
@@ -27,11 +28,66 @@ fn main() {
     }
 }
 
-pub fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
+fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(1, argv, 1, 1, "")?;
 
     molt_ok!("did it")
+}
+
+fn cmd_maze(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    interp.call_subcommand(ctx, argv, 1, &MAZE_SUBCOMMANDS)
+}
+
+const MAZE_SUBCOMMANDS: [Subcommand; 2] = [
+    Subcommand("bintree", cmd_maze_bintree),
+    Subcommand("sidewinder", cmd_maze_sidewinder),
+];
+
+fn cmd_maze_bintree(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 5, 5, "name rows cols")?;
+
+    let name = argv[2].as_str();
+    let rows = argv[3].as_int()?;
+    let cols = argv[4].as_int()?;
+
+    if rows < 2 || cols < 2 {
+        return molt_err!(
+            "expected a max of size at least 2x2, got {}x{}",
+            rows,
+            cols
+        );
+    }
+
+    let mut grid = Grid::new(rows as usize, cols as usize);
+    mazegen::binary_tree_maze(&mut grid);
+    make_grid_object(interp, name, grid);
+
+    molt_ok!(name)
+}
+
+fn cmd_maze_sidewinder(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 5, 5, "name rows cols")?;
+
+    let name = argv[2].as_str();
+    let rows = argv[3].as_int()?;
+    let cols = argv[4].as_int()?;
+
+    if rows < 2 || cols < 2 {
+        return molt_err!(
+            "expected a max of size at least 2x2, got {}x{}",
+            rows,
+            cols
+        );
+    }
+
+    let mut grid = Grid::new(rows as usize, cols as usize);
+    mazegen::sidewinder_maze(&mut grid);
+    make_grid_object(interp, name, grid);
+
+    molt_ok!(name)
 }
 
 pub fn cmd_grid(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
@@ -51,10 +107,14 @@ pub fn cmd_grid(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult
     }
 
     let grid = Grid::new(rows as usize, cols as usize);
+    make_grid_object(interp, name, grid);
+    molt_ok!(name)
+}
+
+
+fn make_grid_object(interp: &mut Interp, name: &str, grid: Grid) {
     let ctx = interp.save_context(grid);
     interp.add_context_command(name, obj_grid, ctx);
-
-    molt_ok!(name)
 }
 
 fn obj_grid(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
