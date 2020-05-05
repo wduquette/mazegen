@@ -1,5 +1,5 @@
-use image::RgbImage;
 use image::ImageBuffer;
+use image::RgbImage;
 use rand::{thread_rng, Rng};
 use std::collections::HashSet;
 use std::fmt::Display;
@@ -231,8 +231,8 @@ impl Grid {
     pub fn to_image(&self) -> RgbImage {
         // FIRST, size and create the image
         let size: u32 = 10;
-        let width = 1 + size*self.num_cols() as u32;
-        let height = 1 + size*self.num_rows() as u32;
+        let width = 1 + size * self.num_cols() as u32;
+        let height = 1 + size * self.num_rows() as u32;
 
         let mut image: RgbImage = ImageBuffer::new(width, height);
         let black = image::Rgb([0, 0, 0]);
@@ -264,10 +264,10 @@ impl Grid {
 
         // NEXT, draw the east and south borders for each cell.
         for i in 0..self.num_rows() {
-            let y = size*i as u32;
+            let y = size * i as u32;
             for j in 0..self.num_cols() {
                 let cell = self.cell(i, j);
-                let x = size*j as u32;
+                let x = size * j as u32;
 
                 // Draw east border
                 if !self.is_linked_east(cell) {
@@ -399,8 +399,7 @@ pub fn sidewinder_maze(grid: &mut Grid) {
 
             let at_eastern_boundary = grid.east_of(cell).is_none();
             let at_northern_boundary = grid.north_of(cell).is_none();
-            let should_close_out = at_eastern_boundary ||
-                (!at_northern_boundary && !flip());
+            let should_close_out = at_eastern_boundary || (!at_northern_boundary && !flip());
 
             if should_close_out {
                 let member = sample(&run);
