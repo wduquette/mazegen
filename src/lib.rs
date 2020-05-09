@@ -307,37 +307,7 @@ impl Grid {
 impl Display for Grid {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         writeln!(f, "Grid({}x{})", self.num_rows, self.num_cols)?;
-
-        write!(f, "+")?;
-        for _ in 0..self.num_cols() {
-            write!(f, "---+")?;
-        }
-
-        for i in 0..self.num_rows() {
-            writeln!(f)?;
-            write!(f, "|")?;
-            for j in 0..self.num_cols() {
-                let cell = self.cell(i, j);
-                if self.is_linked_east(cell) {
-                    write!(f, "    ")?;
-                } else {
-                    write!(f, "   |")?;
-                }
-            }
-
-            writeln!(f)?;
-            write!(f, "+")?;
-            for j in 0..self.num_cols() {
-                let cell = self.cell(i, j);
-                if self.is_linked_south(cell) {
-                    write!(f, "   +")?;
-                } else {
-                    write!(f, "---+")?;
-                }
-            }
-        }
-
-        writeln!(f)
+        writeln!(f, "{}", GridTextRenderer::<usize>::new(self).render())
     }
 }
 
@@ -515,9 +485,6 @@ impl<'a,T> GridTextRenderer<'a,T>
         buff.push('+');
     }
 }
-
-
-
 
 /// Algorithm to produce a Grid containing a binary-tree maze
 pub fn binary_tree_maze(grid: &mut Grid) {
