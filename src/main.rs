@@ -42,7 +42,7 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
 
     mazegen::binary_tree_maze(&mut grid);
     let out = GridTextRenderer::<usize>::new(&grid)
-        .cell_width(5)
+        .auto_width(1)
         .data(&data)
         .render();
 

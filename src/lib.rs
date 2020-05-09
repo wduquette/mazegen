@@ -369,6 +369,12 @@ pub struct GridTextRenderer<'a,T>
     /// TODO: Would a closure be better?
     data: &'a [T],
 
+    /// Whether to compute the width automatically.
+    auto_width: bool,
+
+    /// The margin, when computing auto width.
+    margin: usize,
+
     // TODO: Could add character style, but this will do for now.
 }
 
@@ -381,6 +387,8 @@ impl<'a,T> GridTextRenderer<'a,T>
             grid,
             cell_width: 3,
             data: &[],
+            auto_width: false,
+            margin: 0,
         }
     }
 
@@ -402,28 +410,36 @@ impl<'a,T> GridTextRenderer<'a,T>
         self
     }
 
-    /// Compute the width required to display each data value at its preferred width,
-    /// and size the output accordingly.  The computed width will not be less than the current
-    /// cell_width.
-    pub fn auto_width(mut self) -> Self {
-        if !self.data.is_empty() {
+    /// Compute the width required to display each data value at its preferred width, plus
+    /// a margin on each side, and size the output accordingly.  The computed width will
+    /// not be less than the current cell_width.
+    pub fn auto_width(mut self, margin: usize) -> Self {
+        self.auto_width = true;
+        self.margin = margin;
+        self
+    }
+
+    /// Render the grid using the current parameters.
+    pub fn render(mut self) -> String {
+        // FIRST, if compute the width automatically, if requested.
+        if self.auto_width && !self.data.is_empty() {
             let mut width = 0;
 
+            // FIRST, get the max width in the data
             for val in self.data {
                 width = std::cmp::max(width, val.to_string().len());
             }
 
+            // NEXT, add the margin
+            width += 2*self.margin;
+
+            // NEXT, don't use a width less than the established cell width.
             if width > self.cell_width {
                 self.cell_width = width;
             }
         }
 
-        self
-    }
-
-    /// Render the grid using the current parameters.
-    pub fn render(self) -> String {
-        // FIRST, create the String to hold the output.
+        // NEXT, create the String to hold the output.
         let mut buff = String::new();
 
         // NEXT, write the top border.
