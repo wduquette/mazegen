@@ -242,6 +242,40 @@ impl Grid {
         }
     }
 
+    /// Computes the shortest distance from the cell to each other cell.
+    /// Returns the distances as a vector of length `num_cells`.
+    pub fn distances(&self, cell: Cell) -> Vec<Option<usize>> {
+        // FIRST, create a working vector.  Initially, no distances are computed.
+        let mut dists = Vec::<Option<usize>>::with_capacity(self.num_cells());
+
+        for _ in 0..self.num_cells() {
+            dists.push(None);
+        }
+
+        // NEXT, use a (simplified) Dijkstra's algorithm to compute the distances.
+        // See "Mazes for Programmers" Ch. 3.
+        dists[cell] = Some(0);
+        let mut frontier = HashSet::new();
+        frontier.insert(cell);
+
+        while !frontier.is_empty() {
+            let mut new_frontier = HashSet::new();
+
+            for c in frontier {
+                for d in self.links(c) {
+                    if dists[d].is_none() {
+                        dists[d] = Some(dists[c].expect("valid distance") + 1);
+                        new_frontier.insert(d);
+                    }
+                }
+            }
+            frontier = new_frontier;
+        }
+
+        // NEXT, return the distances.
+        dists
+    }
+
     pub fn to_image(&self) -> RgbImage {
         // FIRST, size and create the image
         let size: u32 = 10;
@@ -356,8 +390,9 @@ impl CellData {
 }
 
 /// A struct for rendering a grid, optionally with some data.  Uses the builder pattern.
-pub struct GridTextRenderer<'a,T>
-    where T: Display
+pub struct GridTextRenderer<'a, T>
+where
+    T: Display,
 {
     /// The grid to render
     grid: &'a Grid,
@@ -374,12 +409,12 @@ pub struct GridTextRenderer<'a,T>
 
     /// The margin, when computing auto width.
     margin: usize,
-
     // TODO: Could add character style, but this will do for now.
 }
 
-impl<'a,T> GridTextRenderer<'a,T>
-    where T: Display
+impl<'a, T> GridTextRenderer<'a, T>
+where
+    T: Display,
 {
     /// Creates a new renderer for the Grid with default settings
     pub fn new(grid: &'a Grid) -> Self {
@@ -431,7 +466,7 @@ impl<'a,T> GridTextRenderer<'a,T>
             }
 
             // NEXT, add the margin
-            width += 2*self.margin;
+            width += 2 * self.margin;
 
             // NEXT, don't use a width less than the established cell width.
             if width > self.cell_width {
@@ -491,7 +526,11 @@ impl<'a,T> GridTextRenderer<'a,T>
         }
 
         // NEXT, format the data on a field with the given width.
-        buff.push_str(&format!("{datum:^width$}", datum=self.data[cell], width=self.cell_width));
+        buff.push_str(&format!(
+            "{datum:^width$}",
+            datum = self.data[cell],
+            width = self.cell_width
+        ));
     }
 
     fn write_south(&self, buff: &mut String, open: bool) {

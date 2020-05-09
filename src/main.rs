@@ -33,15 +33,23 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(1, argv, 1, 1, "")?;
 
-
-    let mut grid = Grid::new(10, 20);
-    let mut data = Vec::new();
-    for i in 0..grid.num_cells() {
-        data.push(i);
-    }
+    let mut grid = Grid::new(5, 5);
 
     mazegen::binary_tree_maze(&mut grid);
-    let out = GridTextRenderer::<usize>::new(&grid)
+    let dists = grid.distances(0);
+
+    let data: Vec<String> = dists
+        .iter()
+        .map(|x| {
+            if x.is_some() {
+                x.unwrap().to_string()
+            } else {
+                "".into()
+            }
+        })
+        .collect();
+
+    let out = GridTextRenderer::<String>::new(&grid)
         .auto_width(1)
         .data(&data)
         .render();
@@ -67,11 +75,7 @@ fn cmd_maze_bintree(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltRe
     let cols = argv[4].as_int()?;
 
     if rows < 2 || cols < 2 {
-        return molt_err!(
-            "expected a max of size at least 2x2, got {}x{}",
-            rows,
-            cols
-        );
+        return molt_err!("expected a max of size at least 2x2, got {}x{}", rows, cols);
     }
 
     let mut grid = Grid::new(rows as usize, cols as usize);
@@ -90,11 +94,7 @@ fn cmd_maze_sidewinder(interp: &mut Interp, _: ContextID, argv: &[Value]) -> Mol
     let cols = argv[4].as_int()?;
 
     if rows < 2 || cols < 2 {
-        return molt_err!(
-            "expected a max of size at least 2x2, got {}x{}",
-            rows,
-            cols
-        );
+        return molt_err!("expected a max of size at least 2x2, got {}x{}", rows, cols);
     }
 
     let mut grid = Grid::new(rows as usize, cols as usize);
@@ -124,7 +124,6 @@ pub fn cmd_grid(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult
     make_grid_object(interp, name, grid);
     molt_ok!(name)
 }
-
 
 fn make_grid_object(interp: &mut Interp, name: &str, grid: Grid) {
     let ctx = interp.save_context(grid);
@@ -171,6 +170,6 @@ fn obj_grid_render(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltR
     let image = grid.to_image();
     match image.save(filename) {
         Ok(_) => molt_ok!(),
-        Err(_) => molt_err!("error saving grid image")
+        Err(_) => molt_err!("error saving grid image"),
     }
 }
