@@ -276,6 +276,45 @@ impl Grid {
         dists
     }
 
+    /// Computes the shortest path from the first cell to the second, returning the path
+    /// as a vector of cells.  If there is no path, the vector will be empty.
+    pub fn shortest_path(&self, start: Cell, goal: Cell) -> Vec<Cell> {
+        // FIRST, compute distances from the starting cell.
+        let dists = self.distances(start);
+
+        // NEXT, compute a path from the goal back to start.
+        let mut path = Vec::new();
+
+        let mut current = goal;
+        path.push(current);
+
+        while current != start {
+            let old_len = path.len();
+
+            // FIRST, get the next step in the path.
+            let cdist = dists[current].expect("valid distance");
+            for neighbor in self.links(current) {
+                let ndist = dists[neighbor].expect("valid distance");
+
+                if ndist < cdist {
+                    path.push(neighbor);
+                    current = neighbor;
+                    break;
+                }
+            }
+
+            // NEXT, if we didn't add a new step to the path then there is no path to start.
+            if path.len() == old_len {
+                path.clear();
+                break;
+            }
+        }
+
+        // FINALLY, return the computed path.
+        path.reverse();
+        path
+    }
+
     pub fn to_image(&self) -> RgbImage {
         // FIRST, size and create the image
         let size: u32 = 10;

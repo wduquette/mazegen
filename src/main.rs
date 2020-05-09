@@ -33,10 +33,10 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(1, argv, 1, 1, "")?;
 
-    let mut grid = Grid::new(5, 5);
+    let mut grid = Grid::new(10, 20);
 
-    mazegen::binary_tree_maze(&mut grid);
-    let dists = grid.distances(0);
+    mazegen::sidewinder_maze(&mut grid);
+    let dists = grid.distances(grid.cell(9, 0));
 
     let data: Vec<String> = dists
         .iter()
@@ -49,10 +49,18 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
         })
         .collect();
 
-    let out = GridTextRenderer::<String>::new(&grid)
+    let mut out = GridTextRenderer::<String>::new(&grid)
         .auto_width(1)
         .data(&data)
         .render();
+
+    let path: Vec<(usize,usize)> = grid.shortest_path(grid.cell(9, 0), grid.cell(0,19))
+        .iter()
+        .map(|x| grid.ij(*x))
+        .collect();
+
+    out.push_str(&format!("{:?}", path));
+    out.push('\n');
 
     molt_ok!(out)
 }
