@@ -1,5 +1,5 @@
-use mazegen::Grid;
-use mazegen::GridTextRenderer;
+use mazegen::grid::Grid;
+use mazegen::grid::GridTextRenderer;
 use molt::check_args;
 use molt::molt_err;
 use molt::molt_ok;
