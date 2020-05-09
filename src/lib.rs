@@ -1,7 +1,10 @@
-use rand::{thread_rng, Rng};
+//! A library for generating and rendering and working with mazes.  The code is inspired
+//! by _Mazes for Programmers_ by Jamis Buck, but isn't a straightforward translation.
 use crate::grid::*;
+use rand::{thread_rng, Rng};
 
 pub mod grid;
+pub mod pixmap;
 
 /// A Cell ID.
 ///

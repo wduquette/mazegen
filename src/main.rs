@@ -54,7 +54,8 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
         .data(&data)
         .render();
 
-    let path: Vec<(usize,usize)> = grid.shortest_path(grid.cell(9, 0), grid.cell(0,19))
+    let path: Vec<(usize, usize)> = grid
+        .shortest_path(grid.cell(9, 0), grid.cell(0, 19))
         .iter()
         .map(|x| grid.ij(*x))
         .collect();
@@ -65,6 +66,7 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     molt_ok!(out)
 }
 
+// TODO: convert to "type name options..." syntax!
 fn cmd_maze(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     interp.call_subcommand(ctx, argv, 1, &MAZE_SUBCOMMANDS)
 }
