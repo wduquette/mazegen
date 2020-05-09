@@ -4,10 +4,17 @@ use rand::{thread_rng, Rng};
 use std::collections::HashSet;
 use std::fmt::Display;
 
-pub fn hello() {
-    println!("Hello, world!");
-}
-
+/// A rectangular grid of cells, which can be used to represent a maze.
+/// Each cell has its neighbors to the north, south, east, and west (as constrained by
+/// the boundaries of the grid), and may be linked to any of its neighbors.  In graph
+/// theory terms, each cell is a node; if two cells are linked there is a bidirectional
+/// edge between them.
+///
+/// Each cell is identified by a unique integer cell ID, and also by an (i,j) row/column pair.
+/// The cell ID and the (i,j) pair can easily be computed one from the other.
+///
+/// A Grid is created with a particular number of rows and columns.  Initially no cell is
+/// linked to any other cell.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Grid {
     num_rows: usize,
@@ -16,12 +23,13 @@ pub struct Grid {
     cells: Vec<CellData>,
 }
 
-// A Cell is an index into the cells vector
+/// A Cell ID.
+///
+/// Internally, a Cell is just an index into the cells vector.  The Grid's
+/// `cell` method returns the cell ID for a given (i,j) pair, and the `i`, `j`, and `ij`
+/// methods do the opposite.
 pub type Cell = usize;
 
-/// TODO: Consider making this generic.  The link information is wholly contained in
-/// the Grid structure; but there's a generic data record for each cell so that the
-/// client can retain data related to the cell.
 impl Grid {
     pub fn new(num_rows: usize, num_cols: usize) -> Self {
         // FIRST, initialize the cells vector
@@ -109,10 +117,16 @@ impl Grid {
         cell % self.num_cols
     }
 
+    /// Computes the row and column indices from the cell ID.
+    pub fn ij(&self, cell: Cell) -> (usize, usize) {
+        assert!(self.contains(cell));
+        (cell / self.num_cols, cell % self.num_cols)
+    }
+
     // Links cell 1 to cell 2.
     // TODO: The linked cells should always be adjacent; but this implementation doesn't
     // require it.  Later in the book, the author talks about "braiding"; possibly,
-    // braiding involves non-adjacent links.
+    // braiding involves non-adjacent links.  If not, an assertion should be put in.
     pub fn link(&mut self, cell1: Cell, cell2: Cell) {
         assert!(self.contains(cell1));
         assert!(self.contains(cell2));
@@ -371,6 +385,141 @@ impl CellData {
     }
 }
 
+/// A struct for rendering a grid, optionally with some data.  Uses the builder pattern.
+pub struct GridTextRenderer<'a,T>
+    where T: Display
+{
+    /// The grid to render
+    grid: &'a Grid,
+
+    /// The  width of the rendered cell in monospace characters.  1+
+    cell_width: usize,
+
+    /// A vector of T data for use when rendering the grid.
+    /// TODO: Would a closure be better?
+    data: &'a [T],
+
+    // TODO: Could add character style, but this will do for now.
+}
+
+impl<'a,T> GridTextRenderer<'a,T>
+    where T: Display
+{
+    /// Creates a new renderer for the Grid with default settings
+    pub fn new(grid: &'a Grid) -> Self {
+        Self {
+            grid,
+            cell_width: 3,
+            data: &[],
+        }
+    }
+
+    /// Adds the desired cell_width.
+    pub fn cell_width(mut self, cell_width: usize) -> Self {
+        self.cell_width = cell_width;
+        self
+    }
+
+    /// Adds a data vector to render in each cell.
+    ///
+    /// # Panics
+    ///
+    /// This method panics if the vector doesn't have the same number of items
+    /// as the Grid has cells.
+    pub fn data(mut self, data: &'a [T]) -> Self {
+        assert!(data.is_empty() || data.len() == self.grid.num_cells());
+        self.data = data;
+        self
+    }
+
+    /// Compute the width required to display each data value at its preferred width,
+    /// and size the output accordingly.  The computed width will not be less than the current
+    /// cell_width.
+    pub fn auto_width(mut self) -> Self {
+        if !self.data.is_empty() {
+            let mut width = 0;
+
+            for val in self.data {
+                width = std::cmp::max(width, val.to_string().len());
+            }
+
+            if width > self.cell_width {
+                self.cell_width = width;
+            }
+        }
+
+        self
+    }
+
+    /// Render the grid using the current parameters.
+    pub fn render(self) -> String {
+        // FIRST, create the String to hold the output.
+        let mut buff = String::new();
+
+        // NEXT, write the top border.
+        buff.push('+');
+        for _ in 0..self.grid.num_cols() {
+            self.write_south(&mut buff, false);
+        }
+
+        // NEXT, write each row.
+        for i in 0..self.grid.num_rows() {
+            buff.push_str("\n|");
+
+            // FIRST, write the cell row
+            for j in 0..self.grid.num_cols() {
+                let cell = self.grid.cell(i, j);
+
+                self.write_cell(&mut buff, cell);
+
+                if self.grid.is_linked_east(cell) {
+                    buff.push(' ');
+                } else {
+                    buff.push('|');
+                }
+            }
+
+            // NEXT, write the row of borders below
+            buff.push_str("\n+");
+
+            for j in 0..self.grid.num_cols() {
+                let cell = self.grid.cell(i, j);
+
+                self.write_south(&mut buff, self.grid.is_linked_south(cell));
+            }
+        }
+
+        buff.push('\n');
+
+        // FINALLY, return the buff
+        buff
+    }
+
+    fn write_cell(&self, buff: &mut String, cell: Cell) {
+        // FIRST, if there's no data just output spaces.
+        if self.data.is_empty() {
+            for _ in 0..self.cell_width {
+                buff.push(' ');
+            }
+            return;
+        }
+
+        // NEXT, format the data on a field with the given width.
+        buff.push_str(&format!("{datum:^width$}", datum=self.data[cell], width=self.cell_width));
+    }
+
+    fn write_south(&self, buff: &mut String, open: bool) {
+        for _ in 0..self.cell_width {
+            buff.push(if open { ' ' } else { '-' });
+        }
+        buff.push('+');
+    }
+}
+
+
+
+
+/// Algorithm to produce a Grid containing a binary-tree maze
 pub fn binary_tree_maze(grid: &mut Grid) {
     for cell in 0..grid.num_cells() {
         let mut neighbors = Vec::new();
@@ -389,6 +538,7 @@ pub fn binary_tree_maze(grid: &mut Grid) {
     }
 }
 
+/// Algorithm to produce a Grid containing a sidewinder maze
 pub fn sidewinder_maze(grid: &mut Grid) {
     for i in 0..grid.num_rows() {
         let mut run = Vec::new();

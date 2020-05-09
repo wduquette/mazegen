@@ -1,4 +1,5 @@
 use mazegen::Grid;
+use mazegen::GridTextRenderer;
 use molt::check_args;
 use molt::molt_err;
 use molt::molt_ok;
@@ -32,7 +33,20 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(1, argv, 1, 1, "")?;
 
-    molt_ok!("did it")
+
+    let mut grid = Grid::new(10, 20);
+    let mut data = Vec::new();
+    for i in 0..grid.num_cells() {
+        data.push(i);
+    }
+
+    mazegen::binary_tree_maze(&mut grid);
+    let out = GridTextRenderer::<usize>::new(&grid)
+        .cell_width(5)
+        .data(&data)
+        .render();
+
+    molt_ok!(out)
 }
 
 fn cmd_maze(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
