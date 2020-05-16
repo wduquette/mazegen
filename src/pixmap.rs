@@ -58,12 +58,26 @@ impl<'a> ImageRenderer<'a> {
         self
     }
 
+    fn iy(&self, i: usize) -> u32 {
+        (self.border_width + i * (self.cell_height + self.border_width)) as u32
+    }
+
+    fn jx(&self, j: usize) -> u32 {
+        (self.border_width + j * (self.cell_width + self.border_width)) as u32
+    }
+
     /// Render the grid using the current parameters.
     pub fn render(self) -> RgbImage {
         // FIRST, size and create the image
-        let size: u32 = 10;
-        let width = 1 + size * self.grid.num_cols() as u32;
-        let height = 1 + size * self.grid.num_rows() as u32;
+        let nr = self.grid.num_rows() as u32;
+        let nc = self.grid.num_cols() as u32;
+        let bw = self.border_width as u32;
+        let cellw = self.cell_width as u32;
+        let cellh = self.cell_height as u32;
+        let bcellw = (self.border_width + self.cell_width) as u32;
+        let bcellh = (self.border_width + self.cell_height) as u32;
+        let width = bw * (nc + 1) + cellw * nc;
+        let height = bw * (nr + 1) + cellh * nr;
 
         let mut image: RgbImage = ImageBuffer::new(width, height);
         let black = image::Rgb([0, 0, 0]);
@@ -72,45 +86,53 @@ impl<'a> ImageRenderer<'a> {
         // NEXT, clear the image to white.
         for y in 0..height {
             for x in 0..width {
-                // NOTE: set_pixel returns an error result if the coordinates are out of bounds.
-                // That should probably be a panic instead, since there's no excuse for it.
-                // NOTE: set_pixel takes a Color, not &Color; and Color isn't Copy.
-                // Consequently you need to create a new Color for each pixel.  Derpy.
                 image.put_pixel(x, y, white);
             }
         }
 
         // NEXT, draw the top and left lines, and the intersection points
         for x in 0..width {
-            image.put_pixel(x, 0, black);
+            for y in 0..bw {
+                image.put_pixel(x, y, black);
+            }
         }
         for y in 0..height {
-            image.put_pixel(0, y, black);
-        }
-        for y in (size..height).step_by(size as usize) {
-            for x in (size..width).step_by(size as usize) {
+            for x in 0..bw {
                 image.put_pixel(x, y, black);
+            }
+        }
+        for y in (bcellh..height).step_by(bcellh as usize) {
+            for x in (bcellw..width).step_by(bcellw as usize) {
+                for x1 in x..(x+bw) {
+                    for y1 in y..(y+bw) {
+                        image.put_pixel(x1, y1, black);
+                    }
+                }
             }
         }
 
         // NEXT, draw the east and south borders for each cell.
         for i in 0..self.grid.num_rows() {
-            let y = size * i as u32;
+            let y = self.iy(i);
             for j in 0..self.grid.num_cols() {
                 let cell = self.grid.cell(i, j);
-                let x = size * j as u32;
+                let x = self.jx(j);
 
                 // Draw east border
                 if !self.grid.is_linked_east(cell) {
-                    for n in y..(y + size) {
-                        image.put_pixel(x + size, n, black);
+                    for y1 in y..(y + cellh) {
+                        for x1 in (x + cellw)..(x + bcellw) {
+                            image.put_pixel(x1, y1, black);
+                        }
                     }
                 }
 
                 // Draw south border
                 if !self.grid.is_linked_south(cell) {
-                    for n in x..(x + size) {
-                        image.put_pixel(n, y + size, black);
+                    for x1 in x..(x + cellw) {
+                        for y1 in (y + cellh)..(y + bcellh) {
+                            image.put_pixel(x1, y1, black);
+                        }
                     }
                 }
             }
@@ -118,4 +140,5 @@ impl<'a> ImageRenderer<'a> {
 
         image
     }
+
 }
