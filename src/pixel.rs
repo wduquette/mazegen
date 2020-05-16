@@ -4,7 +4,7 @@ use image::RgbImage;
 
 /// A struct for rendering a grid as an Image, optionally colored with some data.  Uses the
 /// builder pattern.
-pub struct ImageRenderer<'a> {
+pub struct ImageGridRenderer<'a> {
     /// The grid to render
     grid: &'a Grid,
 
@@ -18,7 +18,7 @@ pub struct ImageRenderer<'a> {
     border_width: usize,
 }
 
-impl<'a> ImageRenderer<'a> {
+impl<'a> ImageGridRenderer<'a> {
     /// Creates a new renderer for the Grid with default settings
     pub fn new(grid: &'a Grid) -> Self {
         Self {

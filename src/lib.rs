@@ -4,7 +4,7 @@ use crate::grid::*;
 use rand::{thread_rng, Rng};
 
 pub mod grid;
-pub mod pixmap;
+pub mod pixel;
 
 /// A Cell ID.
 ///

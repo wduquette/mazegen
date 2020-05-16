@@ -1,6 +1,6 @@
 use mazegen::grid::Grid;
-use mazegen::grid::GridTextRenderer;
-use mazegen::pixmap::ImageRenderer;
+use mazegen::grid::TextGridRenderer;
+use mazegen::pixel::ImageGridRenderer;
 use molt::check_args;
 use molt::molt_err;
 use molt::molt_ok;
@@ -50,7 +50,7 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
         })
         .collect();
 
-    let mut out = GridTextRenderer::<String>::new(&grid)
+    let mut out = TextGridRenderer::<String>::new(&grid)
         .auto_width(1)
         .data(&data)
         .render();
@@ -213,7 +213,7 @@ fn obj_grid_render(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltR
         }
     }
 
-    let image = ImageRenderer::new(grid)
+    let image = ImageGridRenderer::new(grid)
         .cell_size(csize)
         .border_width(bwidth)
         .render();

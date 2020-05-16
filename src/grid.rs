@@ -2,7 +2,7 @@
 
 use crate::Cell;
 use image::RgbImage;
-use crate::pixmap::ImageRenderer;
+use crate::pixel::ImageGridRenderer;
 use std::collections::HashSet;
 use std::fmt::Display;
 
@@ -311,7 +311,7 @@ impl Grid {
     }
 
     pub fn to_image(&self) -> RgbImage {
-        ImageRenderer::new(self)
+        ImageGridRenderer::new(self)
             .cell_size(10)
             .border_width(2)
             .render()
@@ -322,7 +322,7 @@ impl Grid {
 impl Display for Grid {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         writeln!(f, "Grid({}x{})", self.num_rows, self.num_cols)?;
-        writeln!(f, "{}", GridTextRenderer::<usize>::new(self).render())
+        writeln!(f, "{}", TextGridRenderer::<usize>::new(self).render())
     }
 }
 
@@ -371,7 +371,7 @@ impl CellData {
 }
 
 /// A struct for rendering a grid, optionally with some data.  Uses the builder pattern.
-pub struct GridTextRenderer<'a, T>
+pub struct TextGridRenderer<'a, T>
 where
     T: Display,
 {
@@ -393,7 +393,7 @@ where
     // TODO: Could add character style, but this will do for now.
 }
 
-impl<'a, T> GridTextRenderer<'a, T>
+impl<'a, T> TextGridRenderer<'a, T>
 where
     T: Display,
 {
