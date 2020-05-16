@@ -322,18 +322,18 @@ dependencies = [
 
 [[package]]
 name = "molt"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "406906562ea6e4b19c416676c03f9710d8412538bc45ac4b5f9fbd2aa21912ca"
+checksum = "f6ff0d27c6261b74d65ab819de1b163d29917d9f95cf995e5845b6c953e516bc"
 dependencies = [
  "indexmap",
 ]
 
 [[package]]
 name = "molt-shell"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45a7c9f44a76802f222d7f3c7b405a1083bb8fd4658e0999a347838ea798422c"
+checksum = "2a9528ebdbe1fb85a2268c0b64216f0821477b424e07e9233d8cd389bf9b218c"
 dependencies = [
  "molt",
  "rustyline",
