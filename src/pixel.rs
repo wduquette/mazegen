@@ -30,21 +30,21 @@ impl<'a> ImageGridRenderer<'a> {
     }
 
     /// Adds the desired cell_width.
-    pub fn cell_width(mut self, cell_width: usize) -> Self {
+    pub fn cell_width(&mut self, cell_width: usize) -> &mut Self {
         assert!(cell_width > 0);
         self.cell_width = cell_width;
         self
     }
 
     /// Adds the desired cell_width.
-    pub fn cell_height(mut self, cell_height: usize) -> Self {
+    pub fn cell_height(&mut self, cell_height: usize) -> &mut Self {
         assert!(cell_height > 0);
         self.cell_height = cell_height;
         self
     }
 
     /// Adds the desired cell_width and height.
-    pub fn cell_size(mut self, cell_size: usize) -> Self {
+    pub fn cell_size(&mut self, cell_size: usize) -> &mut Self {
         assert!(cell_size > 0);
         self.cell_width = cell_size;
         self.cell_height = cell_size;
@@ -52,7 +52,7 @@ impl<'a> ImageGridRenderer<'a> {
     }
 
     /// Adds the desired cell_width and height.
-    pub fn border_width(mut self, border_width: usize) -> Self {
+    pub fn border_width(&mut self, border_width: usize) -> &mut Self {
         assert!(border_width > 0);
         self.border_width = border_width;
         self
@@ -67,7 +67,7 @@ impl<'a> ImageGridRenderer<'a> {
     }
 
     /// Render the grid using the current parameters.
-    pub fn render(self) -> RgbImage {
+    pub fn render(&self) -> RgbImage {
         // FIRST, size and create the image
         let nr = self.grid.num_rows() as u32;
         let nc = self.grid.num_cols() as u32;

@@ -181,8 +181,7 @@ fn obj_grid_render(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltR
     let opt_args = &argv[3..argv.len()];
     let mut queue = opt_args.iter();
 
-    let mut csize = 10;
-    let mut bwidth = 2;
+    let mut renderer = ImageGridRenderer::new(grid);
 
     while let Some(opt) = queue.next() {
         let val = if let Some(opt_val) = queue.next() {
@@ -197,15 +196,14 @@ fn obj_grid_render(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltR
                 if size < 1 {
                     return molt_err!("invalid -cellsize, expected positive integer");
                 }
-                csize = size as usize;
+                renderer.cell_size(size as usize);
             }
             "-borderwidth" => {
                 let wid = val.as_int()?;
                 if wid < 1 {
                     return molt_err!("invalid -borderwidth, expected positive integer");
                 }
-                bwidth = wid as usize;
-
+                renderer.border_width(wid as usize);
             }
             _ => {
                 return molt_err!("invalid option: \"{}\"", opt);
@@ -213,10 +211,7 @@ fn obj_grid_render(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltR
         }
     }
 
-    let image = ImageGridRenderer::new(grid)
-        .cell_size(csize)
-        .border_width(bwidth)
-        .render();
+    let image = renderer.render();
 
     match image.save(filename) {
         Ok(_) => molt_ok!(),
