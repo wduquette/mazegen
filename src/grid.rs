@@ -378,7 +378,7 @@ where
     /// The grid to render
     grid: &'a Grid,
 
-    /// The  width of the rendered cell in monospace characters.  1+
+    /// The minimum width of the rendered cell in monospace characters.
     cell_width: usize,
 
     /// A vector of T data for use when rendering the grid.
@@ -390,6 +390,7 @@ where
 
     /// The margin, when computing auto width.
     margin: usize,
+
     // TODO: Could add character style, but this will do for now.
 }
 
@@ -409,7 +410,7 @@ where
     }
 
     /// Adds the desired cell_width.
-    pub fn cell_width(mut self, cell_width: usize) -> Self {
+    pub fn cell_width(&mut self, cell_width: usize) -> &mut Self {
         self.cell_width = cell_width;
         self
     }
@@ -420,7 +421,7 @@ where
     ///
     /// This method panics if the vector doesn't have the same number of items
     /// as the Grid has cells.
-    pub fn data(mut self, data: &'a [T]) -> Self {
+    pub fn data(&mut self, data: &'a [T]) -> &mut Self {
         assert!(data.is_empty() || data.len() == self.grid.num_cells());
         self.data = data;
         self
@@ -429,15 +430,17 @@ where
     /// Compute the width required to display each data value at its preferred width, plus
     /// a margin on each side, and size the output accordingly.  The computed width will
     /// not be less than the current cell_width.
-    pub fn auto_width(mut self, margin: usize) -> Self {
+    pub fn auto_width(&mut self, margin: usize) -> &mut Self {
         self.auto_width = true;
         self.margin = margin;
         self
     }
 
     /// Render the grid using the current parameters.
-    pub fn render(mut self) -> String {
+    pub fn render(&self) -> String {
         // FIRST, if compute the width automatically, if requested.
+        let mut cwidth = self.cell_width;
+
         if self.auto_width && !self.data.is_empty() {
             let mut width = 0;
 
@@ -450,8 +453,8 @@ where
             width += 2 * self.margin;
 
             // NEXT, don't use a width less than the established cell width.
-            if width > self.cell_width {
-                self.cell_width = width;
+            if width > cwidth {
+                cwidth = width;
             }
         }
 
@@ -461,7 +464,7 @@ where
         // NEXT, write the top border.
         buff.push('+');
         for _ in 0..self.grid.num_cols() {
-            self.write_south(&mut buff, false);
+            self.write_south(&mut buff, false, cwidth);
         }
 
         // NEXT, write each row.
@@ -472,7 +475,7 @@ where
             for j in 0..self.grid.num_cols() {
                 let cell = self.grid.cell(i, j);
 
-                self.write_cell(&mut buff, cell);
+                self.write_cell(&mut buff, cell, cwidth);
 
                 if self.grid.is_linked_east(cell) {
                     buff.push(' ');
@@ -487,7 +490,7 @@ where
             for j in 0..self.grid.num_cols() {
                 let cell = self.grid.cell(i, j);
 
-                self.write_south(&mut buff, self.grid.is_linked_south(cell));
+                self.write_south(&mut buff, self.grid.is_linked_south(cell), cwidth);
             }
         }
 
@@ -497,10 +500,10 @@ where
         buff
     }
 
-    fn write_cell(&self, buff: &mut String, cell: Cell) {
+    fn write_cell(&self, buff: &mut String, cell: Cell, width: usize) {
         // FIRST, if there's no data just output spaces.
         if self.data.is_empty() {
-            for _ in 0..self.cell_width {
+            for _ in 0..width {
                 buff.push(' ');
             }
             return;
@@ -510,12 +513,12 @@ where
         buff.push_str(&format!(
             "{datum:^width$}",
             datum = self.data[cell],
-            width = self.cell_width
+            width = width
         ));
     }
 
-    fn write_south(&self, buff: &mut String, open: bool) {
-        for _ in 0..self.cell_width {
+    fn write_south(&self, buff: &mut String, open: bool, width: usize) {
+        for _ in 0..width {
             buff.push(if open { ' ' } else { '-' });
         }
         buff.push('+');
