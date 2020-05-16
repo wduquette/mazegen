@@ -1,5 +1,6 @@
 use mazegen::grid::Grid;
 use mazegen::grid::GridTextRenderer;
+use mazegen::pixmap::ImageRenderer;
 use molt::check_args;
 use molt::molt_err;
 use molt::molt_ok;
@@ -173,10 +174,50 @@ fn obj_grid_cols(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
 
 fn obj_grid_render(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
-    check_args(2, argv, 3, 3, "filename")?;
+    check_args(2, argv, 3, 0, "filename ?options...?")?;
     let filename = argv[2].as_str();
     let grid = interp.context::<Grid>(ctx);
-    let image = grid.to_image();
+
+    let opt_args = &argv[3..argv.len()];
+    let mut queue = opt_args.iter();
+
+    let mut csize = 10;
+    let mut bwidth = 2;
+
+    while let Some(opt) = queue.next() {
+        let val = if let Some(opt_val) = queue.next() {
+            opt_val
+        } else {
+            return molt_err!("missing option value");
+        };
+
+        match opt.as_str() {
+            "-cellsize" => {
+                let size = val.as_int()?;
+                if size < 1 {
+                    return molt_err!("invalid -cellsize, expected positive integer");
+                }
+                csize = size as usize;
+            }
+            "-borderwidth" => {
+                let wid = val.as_int()?;
+                if wid < 1 {
+                    return molt_err!("invalid -borderwidth, expected positive integer");
+                }
+                bwidth = wid as usize;
+
+            }
+            _ => {
+                return molt_err!("invalid option: \"{}\"", opt);
+            }
+        }
+    }
+
+    let image = ImageRenderer::new(grid)
+        .cell_size(csize)
+        .border_width(bwidth)
+        .render();
+
     match image.save(filename) {
         Ok(_) => molt_ok!(),
         Err(_) => molt_err!("error saving grid image"),
