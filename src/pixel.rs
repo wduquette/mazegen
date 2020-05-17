@@ -68,6 +68,13 @@ impl<'a> ImageGridRenderer<'a> {
 
     /// Render the grid using the current parameters.
     pub fn render(&self) -> RgbImage {
+        let data: &[i64] = &[];
+        self.render_data(data)
+    }
+
+    /// Render the grid using the current parameters.  Fill the cells by scaling the data in
+    /// the data set from min to max.
+    pub fn render_data(&self, data: &[i64]) -> RgbImage {
         // FIRST, size and create the image
         let nr = self.grid.num_rows() as u32;
         let nc = self.grid.num_cols() as u32;
@@ -82,6 +89,27 @@ impl<'a> ImageGridRenderer<'a> {
         let mut image: RgbImage = ImageBuffer::new(width, height);
         let black = image::Rgb([0, 0, 0]);
         let white = image::Rgb([255, 255, 255]);
+
+        // NEXT, are we rendering data?
+        let mut got_data = !data.is_empty();
+        let mut data_min = std::i64::MAX;
+        let mut data_max = std::i64::MIN;
+        let mut range: f64 = 0.0;
+
+        if got_data {
+            for val in data {
+                data_min = std::cmp::min(*val, data_min);
+                data_max = std::cmp::max(*val, data_min);
+            }
+
+            if data_min < data_max {
+                // We have a range of data; we can plot colors.
+                range = (data_max - data_min) as f64;
+            } else {
+                // We have data in theory, but all of the values are the same.
+                got_data = false;
+            }
+        }
 
         // NEXT, clear the image to white.
         for y in 0..height {
@@ -111,28 +139,54 @@ impl<'a> ImageGridRenderer<'a> {
             }
         }
 
-        // NEXT, draw the east and south borders for each cell.
+        // NEXT, draw the east and south borders for each cell, and fill each cell with data
+        // (if we have data).
         for i in 0..self.grid.num_rows() {
             let y = self.iy(i);
             for j in 0..self.grid.num_cols() {
                 let cell = self.grid.cell(i, j);
                 let x = self.jx(j);
 
-                // Draw east border
-                if !self.grid.is_linked_east(cell) {
+                // Fill the cell with the data color.
+                let mut floor = white;
+
+                if got_data {
+                    let val = 255.0 * (data[cell] as f64)/range;
+
+                    let scaled: u8;
+
+                    if val < 0.0 {
+                        scaled = 0;
+                    } else if val > 255.0 {
+                        scaled = 255;
+                    } else {
+                        scaled = val as u8;
+                    }
+
+                    floor = image::Rgb([255 - scaled, 255 - scaled, 255]);
+
                     for y1 in y..(y + cellh) {
-                        for x1 in (x + cellw)..(x + bcellw) {
-                            image.put_pixel(x1, y1, black);
+                        for x1 in x..(x + cellw) {
+                            image.put_pixel(x1, y1, floor);
                         }
                     }
                 }
 
+                // Draw east border
+                let pixel = if self.grid.is_linked_east(cell) { floor } else { black };
+
+                for y1 in y..(y + cellh) {
+                    for x1 in (x + cellw)..(x + bcellw) {
+                        image.put_pixel(x1, y1, pixel);
+                    }
+                }
+
                 // Draw south border
-                if !self.grid.is_linked_south(cell) {
-                    for x1 in x..(x + cellw) {
-                        for y1 in (y + cellh)..(y + bcellh) {
-                            image.put_pixel(x1, y1, black);
-                        }
+                let pixel = if self.grid.is_linked_south(cell) { floor } else { black };
+
+                for x1 in x..(x + cellw) {
+                    for y1 in (y + cellh)..(y + bcellh) {
+                        image.put_pixel(x1, y1, pixel);
                     }
                 }
             }
@@ -140,5 +194,4 @@ impl<'a> ImageGridRenderer<'a> {
 
         image
     }
-
 }

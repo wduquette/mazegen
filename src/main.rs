@@ -60,6 +60,25 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
         .map(|x| grid.ij(*x))
         .collect();
 
+    let data: Vec<i64> = dists
+        .iter()
+        .map(|x| {
+            if x.is_some() {
+                x.unwrap() as i64
+            } else {
+                0
+            }
+        })
+        .collect();
+    let image = ImageGridRenderer::new(&grid)
+        .cell_size(30)
+        .border_width(5)
+        .render_data(&data);
+
+    if image.save("temp.png").is_err() {
+        return molt_err!("error saving grid image");
+    }
+
     out.push_str(&format!("{:?}", path));
     out.push('\n');
 
