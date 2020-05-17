@@ -322,7 +322,7 @@ impl Grid {
 impl Display for Grid {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         writeln!(f, "Grid({}x{})", self.num_rows, self.num_cols)?;
-        writeln!(f, "{}", TextGridRenderer::<usize>::new(self).render())
+        writeln!(f, "{}", TextGridRenderer::new(self).render())
     }
 }
 
@@ -371,19 +371,12 @@ impl CellData {
 }
 
 /// A struct for rendering a grid, optionally with some data.  Uses the builder pattern.
-pub struct TextGridRenderer<'a, T>
-where
-    T: Display,
-{
+pub struct TextGridRenderer<'a> {
     /// The grid to render
     grid: &'a Grid,
 
     /// The minimum width of the rendered cell in monospace characters.
     cell_width: usize,
-
-    /// A vector of T data for use when rendering the grid.
-    /// TODO: Would a closure be better?
-    data: &'a [T],
 
     /// Whether to compute the width automatically.
     auto_width: bool,
@@ -394,16 +387,12 @@ where
     // TODO: Could add character style, but this will do for now.
 }
 
-impl<'a, T> TextGridRenderer<'a, T>
-where
-    T: Display,
-{
+impl<'a> TextGridRenderer<'a> {
     /// Creates a new renderer for the Grid with default settings
     pub fn new(grid: &'a Grid) -> Self {
         Self {
             grid,
             cell_width: 3,
-            data: &[],
             auto_width: false,
             margin: 0,
         }
@@ -412,18 +401,6 @@ where
     /// Adds the desired cell_width.
     pub fn cell_width(&mut self, cell_width: usize) -> &mut Self {
         self.cell_width = cell_width;
-        self
-    }
-
-    /// Adds a data vector to render in each cell.
-    ///
-    /// # Panics
-    ///
-    /// This method panics if the vector doesn't have the same number of items
-    /// as the Grid has cells.
-    pub fn data(&mut self, data: &'a [T]) -> &mut Self {
-        assert!(data.is_empty() || data.len() == self.grid.num_cells());
-        self.data = data;
         self
     }
 
@@ -438,14 +415,23 @@ where
 
     /// Render the grid using the current parameters.
     pub fn render(&self) -> String {
+        let data: &[usize] = &[];
+        self.render_data(data)
+    }
+
+    /// Render the grid using the current parameters, writing each data item into the
+    /// corresponding cell.  `data` must be empty or have a length of `num_cells`.
+    pub fn render_data<T: Display>(&self, data: &[T]) -> String {
+        assert!(data.is_empty() || data.len() == self.grid.num_cells());
+
         // FIRST, if compute the width automatically, if requested.
         let mut cwidth = self.cell_width;
 
-        if self.auto_width && !self.data.is_empty() {
+        if self.auto_width && !data.is_empty() {
             let mut width = 0;
 
             // FIRST, get the max width in the data
-            for val in self.data {
+            for val in data {
                 width = std::cmp::max(width, val.to_string().len());
             }
 
@@ -475,7 +461,11 @@ where
             for j in 0..self.grid.num_cols() {
                 let cell = self.grid.cell(i, j);
 
-                self.write_cell(&mut buff, cell, cwidth);
+                if !data.is_empty() {
+                    self.write_cell(&mut buff, &data[cell], cwidth);
+                } else {
+                    self.write_cell(&mut buff, &"", cwidth);
+                }
 
                 if self.grid.is_linked_east(cell) {
                     buff.push(' ');
@@ -500,19 +490,11 @@ where
         buff
     }
 
-    fn write_cell(&self, buff: &mut String, cell: Cell, width: usize) {
-        // FIRST, if there's no data just output spaces.
-        if self.data.is_empty() {
-            for _ in 0..width {
-                buff.push(' ');
-            }
-            return;
-        }
-
-        // NEXT, format the data on a field with the given width.
+    fn write_cell<T: Display>(&self, buff: &mut String, value: &T, width: usize) {
+        // FIRST, format the data on a field with the given width.
         buff.push_str(&format!(
             "{datum:^width$}",
-            datum = self.data[cell],
+            datum = value,
             width = width
         ));
     }

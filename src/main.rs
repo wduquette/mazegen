@@ -50,10 +50,9 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
         })
         .collect();
 
-    let mut out = TextGridRenderer::<String>::new(&grid)
+    let mut out = TextGridRenderer::new(&grid)
         .auto_width(1)
-        .data(&data)
-        .render();
+        .render_data(&data);
 
     let path: Vec<(usize, usize)> = grid
         .shortest_path(grid.cell(9, 0), grid.cell(0, 19))
