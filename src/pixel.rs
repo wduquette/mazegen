@@ -74,6 +74,9 @@ impl<'a> ImageGridRenderer<'a> {
 
     /// Render the grid using the current parameters.  Fill the cells by scaling the data in
     /// the data set from min to max.
+    ///
+    /// TODO: Simplify.
+    #[allow(clippy::cognitive_complexity)]
     pub fn render_data(&self, data: &[i64]) -> RgbImage {
         // FIRST, size and create the image
         let nr = self.grid.num_rows() as u32;
