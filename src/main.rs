@@ -55,15 +55,9 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     out.push_str(&textmapper.render_with(&grid, |c| dists[c]));
     out.push('\n');
 
-    // NEXT, render the path from start to end with the distance.
-    // TODO: Must be a way to do this with collect().
-    let mut distpath: HashMap<Cell, Cell> = HashMap::new();
-
-    for c in cellpath {
-        if let Some(dist) = dists[c] {
-            distpath.insert(c, dist);
-        }
-    }
+    let distpath: HashMap<Cell,usize> = cellpath.iter()
+        .map(|c| (*c, dists[*c].unwrap()))
+        .collect();
 
     out.push_str("Path, from start to finish\n");
     out.push_str(&textmapper.render_with(&grid, |c| distpath.get(&c)));
