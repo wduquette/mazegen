@@ -18,6 +18,8 @@ pub type Cell = usize;
 
 /// Algorithm to produce a Grid containing a binary-tree maze
 pub fn binary_tree_maze(grid: &mut Grid) {
+    grid.clear();
+
     for cell in 0..grid.num_cells() {
         let mut neighbors = Vec::new();
 
@@ -37,6 +39,8 @@ pub fn binary_tree_maze(grid: &mut Grid) {
 
 /// Algorithm to produce a Grid containing a sidewinder maze
 pub fn sidewinder_maze(grid: &mut Grid) {
+    grid.clear();
+
     for i in 0..grid.num_rows() {
         let mut run = Vec::new();
 
@@ -56,6 +60,44 @@ pub fn sidewinder_maze(grid: &mut Grid) {
                 run.clear();
             } else {
                 grid.link(cell, grid.east_of(cell).expect("a cell"));
+            }
+        }
+    }
+}
+
+/// Hunt-and-Kill maze algorithm
+pub fn hunt_and_kill(grid: &mut Grid) {
+    grid.clear();
+
+    // FIRST, Pick a random starting point.
+    let mut current: Cell = thread_rng().gen_range(0, grid.num_cells());
+
+    while current != grid.num_cells() {
+        let unvisited_neighbors: Vec<Cell> = grid.neighbors(current).into_iter()
+            .filter(|c| grid.links(*c).is_empty())
+            .collect();
+
+        if !unvisited_neighbors.is_empty() {
+            // Pick an unvisited neighbor as a random walk.
+            let neighbor = sample(&unvisited_neighbors);
+            grid.link(current, neighbor);
+            current = neighbor;
+        } else {
+            // Sentinal value: use this to indicate nothing more to do.
+            current = grid.num_cells();
+
+            // Hunter Block
+            for cell in 0..grid.num_cells() {
+                let visited_neighbors: Vec<Cell> = grid.neighbors(cell).into_iter()
+                    .filter(|c| !grid.links(*c).is_empty())
+                    .collect();
+
+                if grid.links(cell).is_empty() && !visited_neighbors.is_empty() {
+                    current = cell;
+                    let neighbor = sample(&visited_neighbors);
+                    grid.link(current, neighbor);
+                    break;
+                }
             }
         }
     }
