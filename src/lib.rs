@@ -2,10 +2,12 @@
 //! by _Mazes for Programmers_ by Jamis Buck, but isn't a straightforward translation.
 pub use crate::grid::*;
 pub use crate::pixel::*;
+pub use crate::text::*;
 use rand::{thread_rng, Rng};
 
 mod grid;
 mod pixel;
+mod text;
 
 /// A Cell ID.
 ///
