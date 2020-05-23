@@ -40,21 +40,22 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     let mut grid = Grid::new(10, 20);
     mazegen::sidewinder_maze(&mut grid);
 
-    // NEXT, create the mapper
+    // NEXT, compute the longest path in the maze.
+    let cellpath = grid.longest_path();
+
+    // NEXT, compute the distances from the starting point of the path.
+    let dists = grid.distances(cellpath[0]);
+
+    // NEXT, prepare to produce output.
+    let mut out = String::new();
     let textmapper = TextGridRenderer::new().auto_width(1).to_owned();
 
-    // NEXT, compute distances from cell (9,0)
-    let dists = grid.distances(grid.cell(9, 0));
-
     // NEXT, render the maze with distances.
-    let mut out = textmapper.render_with(&grid, |c| dists[c]);
+    out.push_str("Distances from start\n");
+    out.push_str(&textmapper.render_with(&grid, |c| dists[c]));
     out.push('\n');
 
-    // NEXT, compute the shortest path from (9,0) to (9,19), and
-    // output it as a vector.
-    let cellpath = grid.shortest_path(grid.cell(9, 0), grid.cell(9, 19));
-
-    // NEXT, render the shortest path with the distance from start to finish.
+    // NEXT, render the path from start to end with the distance.
     // TODO: Must be a way to do this with collect().
     let mut distpath: HashMap<Cell, Cell> = HashMap::new();
 
@@ -64,8 +65,8 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
         }
     }
 
-    let outpath = textmapper.render_with(&grid, |c| distpath.get(&c));
-    out.push_str(&outpath);
+    out.push_str("Path, from start to finish\n");
+    out.push_str(&textmapper.render_with(&grid, |c| distpath.get(&c)));
 
     // NEXT, save an image as temp.png.
     let image = ImageGridRenderer::new()

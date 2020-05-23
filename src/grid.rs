@@ -311,6 +311,36 @@ impl Grid {
         path
     }
 
+    /// Return the farthest cell from the given cell.
+    pub fn farthest(&self, start: Cell) -> Cell {
+        // Get distances from upper left corner
+        let dists = self.distances(start);
+
+        let mut max = 0;
+        let mut argmax = 0;
+
+        for c in 0..self.num_cells {
+            if let Some(dist) = dists[c] {
+                if dist > max {
+                    max = dist;
+                    argmax = c;
+                }
+            }
+        }
+
+        argmax
+    }
+
+    /// Returns the longest path through the maze.
+    ///
+    /// TODO: This could be more efficient, since we end up computing the distances more often
+    /// than is really necessary.
+    pub fn longest_path(&self) -> Vec<Cell> {
+        let end = self.farthest(0);
+        let start = self.farthest(end);
+        self.shortest_path(start, end)
+    }
+
     pub fn to_image(&self) -> RgbImage {
         ImageGridRenderer::new()
             .cell_size(10)
