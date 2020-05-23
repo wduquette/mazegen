@@ -41,14 +41,14 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     mazegen::sidewinder_maze(&mut grid);
 
     // NEXT, create the mapper
-    let mut textmapper = TextGridRenderer::new(&grid);
+    let mut textmapper = TextGridRenderer::new();
     textmapper.auto_width(1);
 
     // NEXT, compute distances from cell (9,0)
     let dists = grid.distances(grid.cell(9, 0));
 
     // NEXT, render the maze with distances.
-    let mut out = textmapper.render_with(|c| dists[c]);
+    let mut out = textmapper.render_with(&grid, |c| dists[c]);
     out.push('\n');
 
     // NEXT, compute the shortest path from (9,0) to (9,19), and
@@ -65,7 +65,7 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
         }
     }
 
-    let outpath = textmapper.render_with(|c| distpath.get(&c));
+    let outpath = textmapper.render_with(&grid, |c| distpath.get(&c));
     out.push_str(&outpath);
 
     // NEXT, save an image as temp.png.

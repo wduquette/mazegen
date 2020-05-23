@@ -323,7 +323,7 @@ impl Grid {
 impl Display for Grid {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         writeln!(f, "Grid({}x{})", self.num_rows, self.num_cols)?;
-        writeln!(f, "{}", TextGridRenderer::new(self).render())
+        writeln!(f, "{}", TextGridRenderer::new().render(self))
     }
 }
 
@@ -372,10 +372,7 @@ impl CellData {
 }
 
 /// A struct for rendering a grid, optionally with some data.  Uses the builder pattern.
-pub struct TextGridRenderer<'a> {
-    /// The grid to render
-    grid: &'a Grid,
-
+pub struct TextGridRenderer {
     /// The minimum width of the rendered cell in monospace characters.
     cell_width: usize,
 
@@ -388,11 +385,10 @@ pub struct TextGridRenderer<'a> {
     // TODO: Could add character style, but this will do for now.
 }
 
-impl<'a> TextGridRenderer<'a> {
+impl TextGridRenderer {
     /// Creates a new renderer for the Grid with default settings
-    pub fn new(grid: &'a Grid) -> Self {
+    pub fn new() -> Self {
         Self {
-            grid,
             cell_width: 3,
             auto_width: false,
             margin: 0,
@@ -415,20 +411,20 @@ impl<'a> TextGridRenderer<'a> {
     }
 
     /// Render the grid using the current parameters.
-    pub fn render(&self) -> String {
-        self.render_with(|_| None as Option<usize>)
+    pub fn render(&self, grid: &Grid) -> String {
+        self.render_with(grid, |_| None as Option<usize>)
     }
 
     /// Render the grid using the current parameters, writing each data item into the
     /// corresponding cell.  `data` must be empty or have a length of `num_cells`.
-    pub fn render_with<F,T>(&self, f: F) -> String
+    pub fn render_with<F,T>(&self, grid: &Grid, f: F) -> String
         where F: Fn(Cell) -> Option<T>, T: Display
     {
         // FIRST, compute the labels and the max label width.
         let mut labwidth = 0;
         let mut labels = HashMap::new();
 
-        for c in 0..self.grid.num_cells() {
+        for c in 0..grid.num_cells() {
             if let Some(val) = f(c) {
                 let label = val.to_string();
                 labwidth = std::cmp::max(labwidth, label.chars().count());
@@ -448,17 +444,17 @@ impl<'a> TextGridRenderer<'a> {
 
         // NEXT, write the top border.
         buff.push('+');
-        for _ in 0..self.grid.num_cols() {
+        for _ in 0..grid.num_cols() {
             self.write_south(&mut buff, false, cwidth);
         }
 
         // NEXT, write each row.
-        for i in 0..self.grid.num_rows() {
+        for i in 0..grid.num_rows() {
             buff.push_str("\n|");
 
             // FIRST, write the cell row
-            for j in 0..self.grid.num_cols() {
-                let cell = self.grid.cell(i, j);
+            for j in 0..grid.num_cols() {
+                let cell = grid.cell(i, j);
 
                 if let Some(label) = labels.get(&cell) {
                     self.write_cell(&mut buff, &label, cwidth);
@@ -466,7 +462,7 @@ impl<'a> TextGridRenderer<'a> {
                     self.write_cell(&mut buff, &"", cwidth);
                 }
 
-                if self.grid.is_linked_east(cell) {
+                if grid.is_linked_east(cell) {
                     buff.push(' ');
                 } else {
                     buff.push('|');
@@ -476,10 +472,10 @@ impl<'a> TextGridRenderer<'a> {
             // NEXT, write the row of borders below
             buff.push_str("\n+");
 
-            for j in 0..self.grid.num_cols() {
-                let cell = self.grid.cell(i, j);
+            for j in 0..grid.num_cols() {
+                let cell = grid.cell(i, j);
 
-                self.write_south(&mut buff, self.grid.is_linked_south(cell), cwidth);
+                self.write_south(&mut buff, grid.is_linked_south(cell), cwidth);
             }
         }
 
