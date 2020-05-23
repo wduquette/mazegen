@@ -5,10 +5,8 @@ use image::RgbImage;
 
 /// A struct for rendering a grid as an Image, optionally colored with some data.  Uses the
 /// builder pattern.
-pub struct ImageGridRenderer<'a> {
-    /// The grid to render
-    grid: &'a Grid,
-
+#[derive(Default)]
+pub struct ImageGridRenderer {
     /// The width of the rendered cell in pixels, not including the borders.
     cell_width: usize,
 
@@ -19,11 +17,10 @@ pub struct ImageGridRenderer<'a> {
     border_width: usize,
 }
 
-impl<'a> ImageGridRenderer<'a> {
+impl ImageGridRenderer {
     /// Creates a new renderer for the Grid with default settings
-    pub fn new(grid: &'a Grid) -> Self {
+    pub fn new() -> Self {
         Self {
-            grid,
             cell_width: 10,
             cell_height: 10,
             border_width: 1,
@@ -68,19 +65,19 @@ impl<'a> ImageGridRenderer<'a> {
     }
 
     /// Render the grid using the current parameters.
-    pub fn render(&self) -> RgbImage {
-        self.render_with(|_| None)
+    pub fn render(&self, grid: &Grid) -> RgbImage {
+        self.render_with(grid, |_| None)
     }
 
     /// Render the grid using the current parameters.  Fill the cells by scaling the data in
     /// the data set from min to max.
     #[allow(clippy::cognitive_complexity)]
-    pub fn render_with<F>(&self, f: F) -> RgbImage
+    pub fn render_with<F>(&self, grid: &Grid, f: F) -> RgbImage
         where F: Fn(Cell) -> Option<i64>
     {
         // FIRST, size and create the image
-        let nr = self.grid.num_rows() as u32;
-        let nc = self.grid.num_cols() as u32;
+        let nr = grid.num_rows() as u32;
+        let nc = grid.num_cols() as u32;
         let bw = self.border_width as u32;
         let cellw = self.cell_width as u32;
         let cellh = self.cell_height as u32;
@@ -98,7 +95,7 @@ impl<'a> ImageGridRenderer<'a> {
         let mut data_max = std::i64::MIN;
         let mut range: f64 = 0.0;
 
-        for c in 0..self.grid.num_cells() {
+        for c in 0..grid.num_cells() {
             if let Some(val) = f(c) {
                 data_min = std::cmp::min(val, data_min);
                 data_max = std::cmp::max(val, data_min);
@@ -140,10 +137,10 @@ impl<'a> ImageGridRenderer<'a> {
 
         // NEXT, draw the east and south borders for each cell, and fill each cell with data
         // (if we have data).
-        for i in 0..self.grid.num_rows() {
+        for i in 0..grid.num_rows() {
             let y = self.iy(i);
-            for j in 0..self.grid.num_cols() {
-                let cell = self.grid.cell(i, j);
+            for j in 0..grid.num_cols() {
+                let cell = grid.cell(i, j);
                 let x = self.jx(j);
 
                 // Fill the cell with the data color.
@@ -172,7 +169,7 @@ impl<'a> ImageGridRenderer<'a> {
                 }
 
                 // Draw east border
-                let pixel = if self.grid.is_linked_east(cell) { floor } else { black };
+                let pixel = if grid.is_linked_east(cell) { floor } else { black };
 
                 for y1 in y..(y + cellh) {
                     for x1 in (x + cellw)..(x + bcellw) {
@@ -181,7 +178,7 @@ impl<'a> ImageGridRenderer<'a> {
                 }
 
                 // Draw south border
-                let pixel = if self.grid.is_linked_south(cell) { floor } else { black };
+                let pixel = if grid.is_linked_south(cell) { floor } else { black };
 
                 for x1 in x..(x + cellw) {
                     for y1 in (y + cellh)..(y + bcellh) {

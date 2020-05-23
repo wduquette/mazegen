@@ -312,10 +312,10 @@ impl Grid {
     }
 
     pub fn to_image(&self) -> RgbImage {
-        ImageGridRenderer::new(self)
+        ImageGridRenderer::new()
             .cell_size(10)
             .border_width(2)
-            .render()
+            .render(self)
     }
 }
 

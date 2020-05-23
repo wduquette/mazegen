@@ -69,10 +69,10 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     out.push_str(&outpath);
 
     // NEXT, save an image as temp.png.
-    let image = ImageGridRenderer::new(&grid)
+    let image = ImageGridRenderer::new()
         .cell_size(30)
         .border_width(5)
-        .render_with(|c| dists[c].map(|v| v as i64));
+        .render_with(&grid, |c| dists[c].map(|v| v as i64));
 
     if image.save("temp.png").is_err() {
         return molt_err!("error saving grid image");
@@ -195,7 +195,7 @@ fn obj_grid_render(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltR
     let opt_args = &argv[3..argv.len()];
     let mut queue = opt_args.iter();
 
-    let mut renderer = ImageGridRenderer::new(grid);
+    let mut renderer = ImageGridRenderer::new();
 
     while let Some(opt) = queue.next() {
         let val = if let Some(opt_val) = queue.next() {
@@ -225,7 +225,7 @@ fn obj_grid_render(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltR
         }
     }
 
-    let image = renderer.render();
+    let image = renderer.render(&grid);
 
     match image.save(filename) {
         Ok(_) => molt_ok!(),
