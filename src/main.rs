@@ -68,11 +68,11 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     out.push_str("Path, from start to finish\n");
     out.push_str(&textmapper.render_with(&grid, |c| distpath.get(&c)));
 
-    // NEXT, save an image as temp.png.
+    // NEXT, save an image of the path as temp.png.
     let image = ImageGridRenderer::new()
         .cell_size(30)
         .border_width(5)
-        .render_with(&grid, |c| dists[c].map(|v| v as i64));
+        .render_with(&grid, |c| Some(if distpath.contains_key(&c) { 100 } else { 0 }));
 
     if image.save("temp.png").is_err() {
         return molt_err!("error saving grid image");
