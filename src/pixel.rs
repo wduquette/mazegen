@@ -5,7 +5,7 @@ use image::RgbImage;
 
 /// A struct for rendering a grid as an Image, optionally colored with some data.  Uses the
 /// builder pattern.
-#[derive(Default)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct ImageGridRenderer {
     /// The width of the rendered cell in pixels, not including the borders.
     cell_width: usize,

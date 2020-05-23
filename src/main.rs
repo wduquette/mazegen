@@ -41,8 +41,9 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     mazegen::sidewinder_maze(&mut grid);
 
     // NEXT, create the mapper
-    let mut textmapper = TextGridRenderer::new();
-    textmapper.auto_width(1);
+    let textmapper = TextGridRenderer::new()
+        .auto_width(1)
+        .to_owned();
 
     // NEXT, compute distances from cell (9,0)
     let dists = grid.distances(grid.cell(9, 0));

@@ -372,6 +372,7 @@ impl CellData {
 }
 
 /// A struct for rendering a grid, optionally with some data.  Uses the builder pattern.
+#[derive(Debug, Default, Copy, Clone)]
 pub struct TextGridRenderer {
     /// The minimum width of the rendered cell in monospace characters.
     cell_width: usize,
