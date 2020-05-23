@@ -1,3 +1,4 @@
+use crate::Cell;
 use crate::grid::Grid;
 use image::ImageBuffer;
 use image::RgbImage;
@@ -68,16 +69,15 @@ impl<'a> ImageGridRenderer<'a> {
 
     /// Render the grid using the current parameters.
     pub fn render(&self) -> RgbImage {
-        let data: &[i64] = &[];
-        self.render_data(data)
+        self.render_with(|_| None)
     }
 
     /// Render the grid using the current parameters.  Fill the cells by scaling the data in
     /// the data set from min to max.
-    ///
-    /// TODO: Simplify.
     #[allow(clippy::cognitive_complexity)]
-    pub fn render_data(&self, data: &[i64]) -> RgbImage {
+    pub fn render_with<F>(&self, f: F) -> RgbImage
+        where F: Fn(Cell) -> Option<i64>
+    {
         // FIRST, size and create the image
         let nr = self.grid.num_rows() as u32;
         let nc = self.grid.num_cols() as u32;
@@ -94,24 +94,20 @@ impl<'a> ImageGridRenderer<'a> {
         let white = image::Rgb([255, 255, 255]);
 
         // NEXT, are we rendering data?
-        let mut got_data = !data.is_empty();
         let mut data_min = std::i64::MAX;
         let mut data_max = std::i64::MIN;
         let mut range: f64 = 0.0;
 
-        if got_data {
-            for val in data {
-                data_min = std::cmp::min(*val, data_min);
-                data_max = std::cmp::max(*val, data_min);
+        for c in 0..self.grid.num_cells() {
+            if let Some(val) = f(c) {
+                data_min = std::cmp::min(val, data_min);
+                data_max = std::cmp::max(val, data_min);
             }
+        }
 
-            if data_min < data_max {
-                // We have a range of data; we can plot colors.
-                range = (data_max - data_min) as f64;
-            } else {
-                // We have data in theory, but all of the values are the same.
-                got_data = false;
-            }
+        if data_min < data_max {
+            // We have a range of data; we can plot colors.
+            range = (data_max - data_min) as f64;
         }
 
         // NEXT, clear the image to white.
@@ -153,8 +149,8 @@ impl<'a> ImageGridRenderer<'a> {
                 // Fill the cell with the data color.
                 let mut floor = white;
 
-                if got_data {
-                    let val = 255.0 * (data[cell] as f64)/range;
+                if let Some(value) = f(cell) {
+                    let val = 255.0 * (value as f64)/range;
 
                     let scaled: u8;
 

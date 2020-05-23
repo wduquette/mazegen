@@ -51,9 +51,9 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     let mut out = textmapper.render_with(|c| dists[c]);
     out.push('\n');
 
-    // NEXT, compute the shortest path from (9,0) to (0,19), and
+    // NEXT, compute the shortest path from (9,0) to (9,19), and
     // output it as a vector.
-    let cellpath = grid.shortest_path(grid.cell(9, 0), grid.cell(0, 19));
+    let cellpath = grid.shortest_path(grid.cell(9, 0), grid.cell(9, 19));
 
     // NEXT, render the shortest path with the distance from start to finish.
     // TODO: Must be a way to do this with collect().
@@ -67,27 +67,16 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
 
     let outpath = textmapper.render_with(|c| distpath.get(&c));
     out.push_str(&outpath);
-    out.push('\n');
 
-    // // Produce a rendered image, coloring cells with the distance.
-    // let data: Vec<i64> = dists
-    //     .iter()
-    //     .map(|x| {
-    //         if x.is_some() {
-    //             x.unwrap() as i64
-    //         } else {
-    //             0
-    //         }
-    //     })
-    //     .collect();
-    // let image = ImageGridRenderer::new(&grid)
-    //     .cell_size(30)
-    //     .border_width(5)
-    //     .render_data(&data);
-    //
-    // if image.save("temp.png").is_err() {
-    //     return molt_err!("error saving grid image");
-    // }
+    // NEXT, save an image as temp.png.
+    let image = ImageGridRenderer::new(&grid)
+        .cell_size(30)
+        .border_width(5)
+        .render_with(|c| dists[c].map(|v| v as i64));
+
+    if image.save("temp.png").is_err() {
+        return molt_err!("error saving grid image");
+    }
 
     molt_ok!(out)
 }
