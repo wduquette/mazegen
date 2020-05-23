@@ -4,6 +4,7 @@ use crate::Cell;
 use image::RgbImage;
 use crate::pixel::ImageGridRenderer;
 use std::collections::HashSet;
+use std::collections::HashMap;
 use std::fmt::Display;
 
 /// A rectangular grid of cells, which can be used to represent a maze.
@@ -498,15 +499,13 @@ impl<'a> TextGridRenderer<'a> {
     {
         // FIRST, compute the labels and the max label width.
         let mut labwidth = 0;
-        let mut labels = Vec::with_capacity(self.grid.num_cells());
+        let mut labels = HashMap::new();
 
         for c in 0..self.grid.num_cells() {
             if let Some(val) = f(c) {
                 let label = val.to_string();
                 labwidth = std::cmp::max(labwidth, label.chars().count());
-                labels.push(Some(label));
-            } else {
-                labels.push(None);
+                labels.insert(c, label);
             }
         }
 
@@ -534,7 +533,7 @@ impl<'a> TextGridRenderer<'a> {
             for j in 0..self.grid.num_cols() {
                 let cell = self.grid.cell(i, j);
 
-                if let Some(label) = &labels[cell] {
+                if let Some(label) = labels.get(&cell) {
                     self.write_cell(&mut buff, &label, cwidth);
                 } else {
                     self.write_cell(&mut buff, &"", cwidth);
