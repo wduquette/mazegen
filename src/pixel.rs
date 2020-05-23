@@ -1,5 +1,5 @@
-use crate::Cell;
 use crate::grid::Grid;
+use crate::Cell;
 use image::ImageBuffer;
 use image::RgbImage;
 
@@ -73,7 +73,8 @@ impl ImageGridRenderer {
     /// the data set from min to max.
     #[allow(clippy::cognitive_complexity)]
     pub fn render_with<F>(&self, grid: &Grid, f: F) -> RgbImage
-        where F: Fn(Cell) -> Option<i64>
+    where
+        F: Fn(Cell) -> Option<i64>,
     {
         // FIRST, size and create the image
         let nr = grid.num_rows() as u32;
@@ -127,8 +128,8 @@ impl ImageGridRenderer {
         }
         for y in (bcellh..height).step_by(bcellh as usize) {
             for x in (bcellw..width).step_by(bcellw as usize) {
-                for x1 in x..(x+bw) {
-                    for y1 in y..(y+bw) {
+                for x1 in x..(x + bw) {
+                    for y1 in y..(y + bw) {
                         image.put_pixel(x1, y1, black);
                     }
                 }
@@ -147,7 +148,7 @@ impl ImageGridRenderer {
                 let mut floor = white;
 
                 if let Some(value) = f(cell) {
-                    let val = 255.0 * (value as f64)/range;
+                    let val = 255.0 * (value as f64) / range;
 
                     let scaled: u8;
 
@@ -169,7 +170,11 @@ impl ImageGridRenderer {
                 }
 
                 // Draw east border
-                let pixel = if grid.is_linked_east(cell) { floor } else { black };
+                let pixel = if grid.is_linked_east(cell) {
+                    floor
+                } else {
+                    black
+                };
 
                 for y1 in y..(y + cellh) {
                     for x1 in (x + cellw)..(x + bcellw) {
@@ -178,7 +183,11 @@ impl ImageGridRenderer {
                 }
 
                 // Draw south border
-                let pixel = if grid.is_linked_south(cell) { floor } else { black };
+                let pixel = if grid.is_linked_south(cell) {
+                    floor
+                } else {
+                    black
+                };
 
                 for x1 in x..(x + cellw) {
                     for y1 in (y + cellh)..(y + bcellh) {

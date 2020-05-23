@@ -1,7 +1,7 @@
 use mazegen::Cell;
-use mazegen::grid::Grid;
-use mazegen::grid::TextGridRenderer;
-use mazegen::pixel::ImageGridRenderer;
+use mazegen::Grid;
+use mazegen::ImageGridRenderer;
+use mazegen::TextGridRenderer;
 use molt::check_args;
 use molt::molt_err;
 use molt::molt_ok;
@@ -41,9 +41,7 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     mazegen::sidewinder_maze(&mut grid);
 
     // NEXT, create the mapper
-    let textmapper = TextGridRenderer::new()
-        .auto_width(1)
-        .to_owned();
+    let textmapper = TextGridRenderer::new().auto_width(1).to_owned();
 
     // NEXT, compute distances from cell (9,0)
     let dists = grid.distances(grid.cell(9, 0));
@@ -58,11 +56,11 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
 
     // NEXT, render the shortest path with the distance from start to finish.
     // TODO: Must be a way to do this with collect().
-    let mut distpath: HashMap<Cell,Cell> = HashMap::new();
+    let mut distpath: HashMap<Cell, Cell> = HashMap::new();
 
     for c in cellpath {
         if let Some(dist) = dists[c] {
-            distpath.insert(c,dist);
+            distpath.insert(c, dist);
         }
     }
 

@@ -1,10 +1,10 @@
 //! This module defines Grid, a rectilinear Grid for building mazes with.
 
+use crate::pixel::ImageGridRenderer;
 use crate::Cell;
 use image::RgbImage;
-use crate::pixel::ImageGridRenderer;
-use std::collections::HashSet;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fmt::Display;
 
 /// A rectangular grid of cells, which can be used to represent a maze.
@@ -382,7 +382,6 @@ pub struct TextGridRenderer {
 
     /// The margin, when computing auto width.
     margin: usize,
-
     // TODO: Could add character style, but this will do for now.
 }
 
@@ -418,8 +417,10 @@ impl TextGridRenderer {
 
     /// Render the grid using the current parameters, writing each data item into the
     /// corresponding cell.  `data` must be empty or have a length of `num_cells`.
-    pub fn render_with<F,T>(&self, grid: &Grid, f: F) -> String
-        where F: Fn(Cell) -> Option<T>, T: Display
+    pub fn render_with<F, T>(&self, grid: &Grid, f: F) -> String
+    where
+        F: Fn(Cell) -> Option<T>,
+        T: Display,
     {
         // FIRST, compute the labels and the max label width.
         let mut labwidth = 0;
@@ -488,11 +489,7 @@ impl TextGridRenderer {
 
     fn write_cell<T: Display>(&self, buff: &mut String, value: &T, width: usize) {
         // FIRST, format the data on a field with the given width.
-        buff.push_str(&format!(
-            "{datum:^width$}",
-            datum = value,
-            width = width
-        ));
+        buff.push_str(&format!("{datum:^width$}", datum = value, width = width));
     }
 
     fn write_south(&self, buff: &mut String, open: bool, width: usize) {
