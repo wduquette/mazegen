@@ -1,3 +1,4 @@
+use mazegen::Cell;
 use mazegen::grid::Grid;
 use mazegen::grid::TextGridRenderer;
 use mazegen::pixel::ImageGridRenderer;
@@ -6,6 +7,7 @@ use molt::molt_err;
 use molt::molt_ok;
 use molt::types::*;
 use molt::Interp;
+use std::collections::HashMap;
 
 fn main() {
     use std::env;
@@ -34,11 +36,15 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(1, argv, 1, 1, "")?;
 
+    // FIRST, produce a maze.
     let mut grid = Grid::new(10, 20);
 
     mazegen::sidewinder_maze(&mut grid);
+
+    // NEXT, compute distances from cell (9,0)
     let dists = grid.distances(grid.cell(9, 0));
 
+    // NEXT, render the map with distances from (9,0)
     let data: Vec<String> = dists
         .iter()
         .map(|x| {
@@ -50,37 +56,48 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
         })
         .collect();
 
-    let mut out = TextGridRenderer::new(&grid)
-        .auto_width(1)
-        .render_data(&data);
+    let mut textmapper = TextGridRenderer::new(&grid);
+    textmapper.auto_width(1);
 
-    let path: Vec<(usize, usize)> = grid
-        .shortest_path(grid.cell(9, 0), grid.cell(0, 19))
-        .iter()
-        .map(|x| grid.ij(*x))
-        .collect();
+    let mut out = textmapper.render_data(&data);
 
-    let data: Vec<i64> = dists
-        .iter()
-        .map(|x| {
-            if x.is_some() {
-                x.unwrap() as i64
-            } else {
-                0
-            }
-        })
-        .collect();
-    let image = ImageGridRenderer::new(&grid)
-        .cell_size(30)
-        .border_width(5)
-        .render_data(&data);
+    // NEXT, compute the shortest path from (9,0) to (0,19), and
+    // output it as a vector.
+    let cellpath = grid.shortest_path(grid.cell(9, 0), grid.cell(0, 19));
 
-    if image.save("temp.png").is_err() {
-        return molt_err!("error saving grid image");
+    // NEXT, render the shortest path with the distance from start to finish.
+    // TODO: Must be a way to do this with collect().
+    let mut distpath: HashMap<Cell,Cell> = HashMap::new();
+
+    for c in cellpath {
+        if let Some(dist) = dists[c] {
+            distpath.insert(c,dist);
+        }
     }
 
-    out.push_str(&format!("{:?}", path));
+    let outpath = textmapper.render_with(|c| distpath.get(&c));
+    out.push_str(&outpath);
     out.push('\n');
+
+    // // Produce a rendered image, coloring cells with the distance.
+    // let data: Vec<i64> = dists
+    //     .iter()
+    //     .map(|x| {
+    //         if x.is_some() {
+    //             x.unwrap() as i64
+    //         } else {
+    //             0
+    //         }
+    //     })
+    //     .collect();
+    // let image = ImageGridRenderer::new(&grid)
+    //     .cell_size(30)
+    //     .border_width(5)
+    //     .render_data(&data);
+    //
+    // if image.save("temp.png").is_err() {
+    //     return molt_err!("error saving grid image");
+    // }
 
     molt_ok!(out)
 }

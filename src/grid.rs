@@ -490,6 +490,78 @@ impl<'a> TextGridRenderer<'a> {
         buff
     }
 
+    /// Render the grid using the current parameters, writing each data item into the
+    /// corresponding cell.  `data` must be empty or have a length of `num_cells`.
+    pub fn render_with<F,T>(&self, f: F) -> String
+        where F: Fn(Cell) -> Option<T>, T: Display
+    {
+        // FIRST, compute the labels and the max label width.
+        let mut labwidth = 0;
+        let mut labels = Vec::with_capacity(self.grid.num_cells());
+
+        for c in 0..self.grid.num_cells() {
+            if let Some(val) = f(c) {
+                let label = val.to_string();
+                labwidth = std::cmp::max(labwidth, label.chars().count());
+                labels.push(Some(label));
+            } else {
+                labels.push(None);
+            }
+        }
+
+        // NEXT, compute the desired cell width.
+        let mut cwidth = self.cell_width;
+
+        if self.auto_width {
+            cwidth = std::cmp::max(cwidth, labwidth + 2 * self.margin);
+        }
+
+        // NEXT, create the String to hold the output.
+        let mut buff = String::new();
+
+        // NEXT, write the top border.
+        buff.push('+');
+        for _ in 0..self.grid.num_cols() {
+            self.write_south(&mut buff, false, cwidth);
+        }
+
+        // NEXT, write each row.
+        for i in 0..self.grid.num_rows() {
+            buff.push_str("\n|");
+
+            // FIRST, write the cell row
+            for j in 0..self.grid.num_cols() {
+                let cell = self.grid.cell(i, j);
+
+                if let Some(label) = &labels[cell] {
+                    self.write_cell(&mut buff, &label, cwidth);
+                } else {
+                    self.write_cell(&mut buff, &"", cwidth);
+                }
+
+                if self.grid.is_linked_east(cell) {
+                    buff.push(' ');
+                } else {
+                    buff.push('|');
+                }
+            }
+
+            // NEXT, write the row of borders below
+            buff.push_str("\n+");
+
+            for j in 0..self.grid.num_cols() {
+                let cell = self.grid.cell(i, j);
+
+                self.write_south(&mut buff, self.grid.is_linked_south(cell), cwidth);
+            }
+        }
+
+        buff.push('\n');
+
+        // FINALLY, return the buff
+        buff
+    }
+
     fn write_cell<T: Display>(&self, buff: &mut String, value: &T, width: usize) {
         // FIRST, format the data on a field with the given width.
         buff.push_str(&format!(
