@@ -38,28 +38,18 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
 
     // FIRST, produce a maze.
     let mut grid = Grid::new(10, 20);
-
     mazegen::sidewinder_maze(&mut grid);
+
+    // NEXT, create the mapper
+    let mut textmapper = TextGridRenderer::new(&grid);
+    textmapper.auto_width(1);
 
     // NEXT, compute distances from cell (9,0)
     let dists = grid.distances(grid.cell(9, 0));
 
-    // NEXT, render the map with distances from (9,0)
-    let data: Vec<String> = dists
-        .iter()
-        .map(|x| {
-            if x.is_some() {
-                x.unwrap().to_string()
-            } else {
-                "".into()
-            }
-        })
-        .collect();
-
-    let mut textmapper = TextGridRenderer::new(&grid);
-    textmapper.auto_width(1);
-
-    let mut out = textmapper.render_data(&data);
+    // NEXT, render the maze with distances.
+    let mut out = textmapper.render_with(|c| dists[c]);
+    out.push('\n');
 
     // NEXT, compute the shortest path from (9,0) to (0,19), and
     // output it as a vector.
