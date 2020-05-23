@@ -415,12 +415,13 @@ impl<'a> TextGridRenderer<'a> {
 
     /// Render the grid using the current parameters.
     pub fn render(&self) -> String {
-        let data: &[usize] = &[];
-        self.render_data(data)
+        self.render_with(|_| None as Option<usize>)
     }
 
     /// Render the grid using the current parameters, writing each data item into the
     /// corresponding cell.  `data` must be empty or have a length of `num_cells`.
+    ///
+    /// TODO: See if we really need this.
     pub fn render_data<T: Display>(&self, data: &[T]) -> String {
         assert!(data.is_empty() || data.len() == self.grid.num_cells());
 
