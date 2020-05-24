@@ -8,6 +8,7 @@ use rand::{thread_rng, Rng};
 
 mod grid;
 mod image_grid_renderer;
+pub mod molt_image;
 mod pixel;
 mod text_grid_renderer;
 
