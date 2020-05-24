@@ -1,7 +1,7 @@
 use crate::grid::Grid;
 use crate::Cell;
 use image::ImageBuffer;
-use image::RgbImage;
+use image::RgbaImage;
 
 /// A struct for rendering a grid as an Image, optionally colored with some data.  Uses the
 /// builder pattern.
@@ -65,14 +65,14 @@ impl ImageGridRenderer {
     }
 
     /// Render the grid using the current parameters.
-    pub fn render(&self, grid: &Grid) -> RgbImage {
+    pub fn render(&self, grid: &Grid) -> RgbaImage {
         self.render_with(grid, |_| None)
     }
 
     /// Render the grid using the current parameters.  Fill the cells by scaling the data in
     /// the data set from min to max.
     #[allow(clippy::cognitive_complexity)]
-    pub fn render_with<F>(&self, grid: &Grid, f: F) -> RgbImage
+    pub fn render_with<F>(&self, grid: &Grid, f: F) -> RgbaImage
     where
         F: Fn(Cell) -> Option<i64>,
     {
@@ -87,9 +87,9 @@ impl ImageGridRenderer {
         let width = bw * (nc + 1) + cellw * nc;
         let height = bw * (nr + 1) + cellh * nr;
 
-        let mut image: RgbImage = ImageBuffer::new(width, height);
-        let black = image::Rgb([0, 0, 0]);
-        let white = image::Rgb([255, 255, 255]);
+        let mut image: RgbaImage = ImageBuffer::new(width, height);
+        let black = image::Rgba([0, 0, 0, 255]);
+        let white = image::Rgba([255, 255, 255, 255]);
 
         // NEXT, are we rendering data?
         let mut data_min = std::i64::MAX;
@@ -160,7 +160,7 @@ impl ImageGridRenderer {
                         scaled = val as u8;
                     }
 
-                    floor = image::Rgb([255 - scaled, 255 - scaled, 255]);
+                    floor = image::Rgba([255 - scaled, 255 - scaled, 255, 255]);
 
                     for y1 in y..(y + cellh) {
                         for x1 in x..(x + cellw) {

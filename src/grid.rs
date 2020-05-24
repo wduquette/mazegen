@@ -3,7 +3,7 @@
 use crate::Cell;
 use crate::ImageGridRenderer;
 use crate::TextGridRenderer;
-use image::RgbImage;
+use image::RgbaImage;
 use std::collections::HashSet;
 use std::fmt::Display;
 
@@ -341,7 +341,7 @@ impl Grid {
         self.shortest_path(start, end)
     }
 
-    pub fn to_image(&self) -> RgbImage {
+    pub fn to_image(&self) -> RgbaImage {
         ImageGridRenderer::new()
             .cell_size(10)
             .border_width(2)
