@@ -2,11 +2,13 @@
 //! by _Mazes for Programmers_ by Jamis Buck, but isn't a straightforward translation.
 pub use crate::grid::*;
 pub use crate::image_grid_renderer::*;
+pub use crate::pixel::*;
 pub use crate::text_grid_renderer::*;
 use rand::{thread_rng, Rng};
 
 mod grid;
 mod image_grid_renderer;
+mod pixel;
 mod text_grid_renderer;
 
 /// A Cell ID.
@@ -73,7 +75,9 @@ pub fn hunt_and_kill(grid: &mut Grid) {
     let mut current: Cell = thread_rng().gen_range(0, grid.num_cells());
 
     while current != grid.num_cells() {
-        let unvisited_neighbors: Vec<Cell> = grid.neighbors(current).into_iter()
+        let unvisited_neighbors: Vec<Cell> = grid
+            .neighbors(current)
+            .into_iter()
             .filter(|c| grid.links(*c).is_empty())
             .collect();
 
@@ -88,7 +92,9 @@ pub fn hunt_and_kill(grid: &mut Grid) {
 
             // Hunter Block
             for cell in 0..grid.num_cells() {
-                let visited_neighbors: Vec<Cell> = grid.neighbors(cell).into_iter()
+                let visited_neighbors: Vec<Cell> = grid
+                    .neighbors(cell)
+                    .into_iter()
                     .filter(|c| !grid.links(*c).is_empty())
                     .collect();
 

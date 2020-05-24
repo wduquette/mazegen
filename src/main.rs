@@ -55,9 +55,8 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     out.push_str(&textmapper.render_with(&grid, |c| dists[c]));
     out.push('\n');
 
-    let distpath: HashMap<Cell,usize> = cellpath.iter()
-        .map(|c| (*c, dists[*c].unwrap()))
-        .collect();
+    let distpath: HashMap<Cell, usize> =
+        cellpath.iter().map(|c| (*c, dists[*c].unwrap())).collect();
 
     out.push_str("Path, from start to finish\n");
     out.push_str(&textmapper.render_with(&grid, |c| distpath.get(&c)));
@@ -66,7 +65,9 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     let image = ImageGridRenderer::new()
         .cell_size(30)
         .border_width(5)
-        .render_with(&grid, |c| Some(if distpath.contains_key(&c) { 100 } else { 0 }));
+        .render_with(&grid, |c| {
+            Some(if distpath.contains_key(&c) { 100 } else { 0 })
+        });
 
     if image.save("temp.png").is_err() {
         return molt_err!("error saving grid image");
