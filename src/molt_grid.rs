@@ -45,15 +45,25 @@ fn obj_grid(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     interp.call_subcommand(ctx, argv, 1, &OBJ_GRID_SUBCOMMANDS)
 }
 
-const OBJ_GRID_SUBCOMMANDS: [Subcommand; 6] = [
+const OBJ_GRID_SUBCOMMANDS: [Subcommand; 15] = [
     Subcommand("cell", obj_grid_cell),
     Subcommand("cells", obj_grid_cells),
+    Subcommand("clear", obj_grid_clear),
     Subcommand("cols", obj_grid_cols),
+    Subcommand("distances", obj_grid_distances),
+    Subcommand("i", obj_grid_i),
+    Subcommand("ij", obj_grid_ij),
+    Subcommand("islinked", obj_grid_is_linked),
+    Subcommand("j", obj_grid_j),
+    Subcommand("links", obj_grid_links),
+    Subcommand("longest", obj_grid_longest),
+    Subcommand("neighbors", obj_grid_neighbors),
     Subcommand("render", obj_grid_render),
     Subcommand("rows", obj_grid_rows),
     Subcommand("text", obj_grid_text),
 ];
 
+// Converts an (i,j) pair into a cell ID
 fn obj_grid_cell(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(2, argv, 4, 4, "i j")?;
@@ -65,6 +75,7 @@ fn obj_grid_cell(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
     molt_ok!(grid.cell(i, j) as MoltInt)
 }
 
+// Gets the number of cells in the grid.  Cells have IDs in the range `[0..cells)`.
 fn obj_grid_cells(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(2, argv, 2, 2, "")?;
@@ -72,6 +83,18 @@ fn obj_grid_cells(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRe
     molt_ok!(grid.num_cells() as MoltInt)
 }
 
+// Clears the links in the grid.
+fn obj_grid_clear(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 2, 2, "")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    grid.clear();
+
+    molt_ok!()
+}
+
+// Gets the number of columns in the grid.  Columns are indexed `[0..cols)`.
 fn obj_grid_cols(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(2, argv, 2, 2, "")?;
@@ -79,6 +102,137 @@ fn obj_grid_cols(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
     molt_ok!(grid.num_cols() as MoltInt)
 }
 
+// $grid distances *cell* ?-list|-dict?
+//
+// Gets the distances from a given cell as a list indexed by cell ID, or as a
+// dictionary of cells and distances.  Defaults to -list.  If a cell is unreachable from
+// the given cell, the distance is the empty string.
+fn obj_grid_distances(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 3, 4, "cell ?opt?")?;
+    let grid = interp.context::<Grid>(ctx);
+    let cell = get_grid_cell(grid, &argv[2])?;
+
+    let as_dict = if argv.len() == 4 {
+        let opt = argv[3].as_str();
+        match opt {
+            "-list" => false,
+            "-dict" => true,
+            _ => {
+                return molt_err!("invalid option \"{}\", should be one of: -list, -dict", opt);
+            }
+        }
+    } else {
+        false
+    };
+
+    if as_dict {
+        let dict: MoltDict = grid.distances(cell).iter().enumerate()
+            .map(|(k,v)| (Value::from(k as MoltInt), from_option(*v)))
+            .collect();
+        molt_ok!(dict)
+    } else {
+        let list: MoltList = grid.distances(cell).iter()
+            .map(|c| from_option(*c))
+            .collect();
+        molt_ok!(list)
+    }
+}
+
+
+// Gets the cell's row coordinate given its cell ID
+fn obj_grid_i(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 3, 3, "cell")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    let cell = get_grid_cell(grid, &argv[2])?;
+
+    molt_ok!(grid.i(cell) as MoltInt)
+}
+
+// Gets the cell's row/col coordinate pair given its cell ID
+fn obj_grid_ij(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 3, 3, "cell")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    let cell = get_grid_cell(grid, &argv[2])?;
+
+    let (i, j) = grid.ij(cell);
+
+    molt_ok!(vec![Value::from(i as MoltInt), Value::from(j as MoltInt)])
+}
+
+// Returns true if the cells are linked, and false otherwise
+fn obj_grid_is_linked(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 4, 4, "cell1 cell2")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    let cell1 = get_grid_cell(grid, &argv[2])?;
+    let cell2 = get_grid_cell(grid, &argv[3])?;
+
+    molt_ok!(grid.is_linked(cell1, cell2))
+}
+
+
+// Gets the cell's column coordinate given its cell ID
+fn obj_grid_j(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 3, 3, "cell")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    let cell = get_grid_cell(grid, &argv[2])?;
+
+    molt_ok!(grid.j(cell) as MoltInt)
+}
+
+// Gets a list of the IDs of the cell's linked neighbors
+fn obj_grid_links(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 3, 3, "cell")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    let cell = get_grid_cell(grid, &argv[2])?;
+
+    let list: MoltList = grid.links(cell).iter()
+        .map(|c| Value::from(*c as MoltInt))
+        .collect();
+
+    molt_ok!(list)
+}
+
+// $grid longest
+//
+// Returns the longest path through the maze as a list of cell IDs
+fn obj_grid_longest(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 2, 2, "")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    let list: MoltList = grid.longest_path().iter()
+        .map(|c| Value::from(*c as MoltInt))
+        .collect();
+    molt_ok!(list)
+}
+
+// Gets a list of the IDs of the cell's neighbors
+fn obj_grid_neighbors(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 3, 3, "cell")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    let cell = get_grid_cell(grid, &argv[2])?;
+
+    let list: MoltList = grid.neighbors(cell).iter()
+        .map(|c| Value::from(*c as MoltInt))
+        .collect();
+
+    molt_ok!(list)
+}
+
+// Renders the grid as an image, saving it to disk.
 fn obj_grid_render(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(2, argv, 3, 0, "filename ?options...?")?;
@@ -126,6 +280,7 @@ fn obj_grid_render(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltR
     }
 }
 
+// Gets the number of rows in the grid.  Rows are indexed `[0..rows)`.
 fn obj_grid_rows(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(2, argv, 2, 2, "")?;
@@ -133,6 +288,7 @@ fn obj_grid_rows(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
     molt_ok!(grid.num_rows() as MoltInt)
 }
 
+// Renders the grid as a text string, which is returned.
 fn obj_grid_text(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(2, argv, 2, 2, "")?;
@@ -159,5 +315,24 @@ fn get_grid_col(grid: &Grid, arg: &Value) -> Result<usize, Exception> {
         Ok(num as usize)
     } else {
         molt_err!("expected grid column index, got \"{}\"", num)
+    }
+}
+
+/// Get a grid cell for the given grid.
+fn get_grid_cell(grid: &Grid, arg: &Value) -> Result<usize, Exception> {
+    let num = arg.as_int()?;
+
+    if num >= 0 && num < grid.num_cells() as MoltInt {
+        Ok(num as usize)
+    } else {
+        molt_err!("expected grid cell ID, got \"{}\"", num)
+    }
+}
+
+fn from_option(val: Option<usize>) -> Value {
+    if let Some(t) = val {
+        Value::from(t as MoltInt)
+    } else {
+        Value::empty()
     }
 }
