@@ -1,9 +1,9 @@
 //! Molt "rand" Command
-use molt::Interp;
 use molt::check_args;
 use molt::molt_err;
 use molt::molt_ok;
 use molt::types::*;
+use molt::Interp;
 use rand::{thread_rng, Rng};
 
 /// Installs the Molt "rand" command into the interpreter.

@@ -1,8 +1,8 @@
+use mazegen::molt_grid::make_grid_object;
 use mazegen::Cell;
 use mazegen::Grid;
 use mazegen::ImageGridRenderer;
 use mazegen::TextGridRenderer;
-use mazegen::molt_grid::make_grid_object;
 use molt::check_args;
 use molt::molt_err;
 use molt::molt_ok;

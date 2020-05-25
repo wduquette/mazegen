@@ -1,16 +1,15 @@
 //! Molt Image Commands
-use molt::Interp;
+use crate::MoltPixel;
 use molt::check_args;
 use molt::molt_err;
 use molt::molt_ok;
 use molt::types::*;
-use crate::MoltPixel;
+use molt::Interp;
 
 /// Installs the Molt image commands into the interpreter.
 pub fn install(interp: &mut Interp) {
     interp.add_command("pixel", cmd_pixel);
 }
-
 
 fn cmd_pixel(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     interp.call_subcommand(ctx, argv, 1, &PIXEL_SUBCOMMANDS)
@@ -92,7 +91,7 @@ fn cmd_pixel_alpha(_: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     molt_ok!(pixel.alpha() as MoltInt)
 }
 
-fn get_unsigned_byte(arg: &Value) -> Result<u8,Exception> {
+fn get_unsigned_byte(arg: &Value) -> Result<u8, Exception> {
     let num = arg.as_int()?;
 
     if num >= 0 && num < 256 {
