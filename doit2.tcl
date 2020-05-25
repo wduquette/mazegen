@@ -1,3 +1,3 @@
-maze huntandkill foo 40 40
+maze huntandkill foo 5 10
 puts [foo text]
-foo render temp.png -cellsize 20 -borderwidth 3
+puts "longest: [foo longest]"
