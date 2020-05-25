@@ -5,6 +5,8 @@ _Mazes for Programmers_ by Jamis Buck.  It is also an opportunity to experiment
 with using the [Molt](https://github.com/wduquette/molt) interpreter to wrap Rust APIs as
 a convenience and development aid, and to look for rough spots in Molt's Rust API.
 
+**Note:** If you find this interesting, please let me know!
+
 The Rust API provides:
 
 * A Grid type for rectangular mazes
