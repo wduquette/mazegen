@@ -5,7 +5,9 @@ use crate::ImageGridRenderer;
 use crate::TextGridRenderer;
 use image::RgbaImage;
 use std::collections::HashSet;
+use std::fmt;
 use std::fmt::Display;
+use std::str::FromStr;
 
 /// A rectangular grid of cells, which can be used to represent a maze.
 /// Each cell has its neighbors to the north, south, east, and west (as constrained by
@@ -151,6 +153,16 @@ impl Grid {
         self.cells[cell1].links.contains(&cell2)
     }
 
+    // Indicates whether or not the cells are linked
+    pub fn is_linked_to(&self, cell: Cell, dir: GridDirection) -> bool {
+        match dir {
+            GridDirection::North => self.is_linked_north(cell),
+            GridDirection::South => self.is_linked_south(cell),
+            GridDirection::East => self.is_linked_east(cell),
+            GridDirection::West => self.is_linked_west(cell),
+        }
+    }
+
     // Gets the neighbors to the north, south, east, and west of this cell.
     pub fn neighbors(&self, cell: Cell) -> Vec<Cell> {
         assert!(self.contains(cell));
@@ -161,6 +173,16 @@ impl Grid {
     pub fn contains(&self, cell: Cell) -> bool {
         // NOTE: No need to check against zero, since we're using an unsigned type.
         cell < self.num_cells
+    }
+
+    /// Gets the cell to the given direction, if any.
+    pub fn cell_to(&self, cell: Cell, dir: GridDirection) -> Option<Cell> {
+        match dir {
+            GridDirection::North => self.north_of(cell),
+            GridDirection::South => self.south_of(cell),
+            GridDirection::East => self.east_of(cell),
+            GridDirection::West => self.west_of(cell),
+        }
     }
 
     /// Gets the cell to the north, if any.
@@ -357,6 +379,41 @@ impl Display for Grid {
     }
 }
 
+/// The directions between cells in this grid.
+/// TODO: Should be an associated type?
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub enum GridDirection {
+    North,
+    South,
+    East,
+    West,
+}
+
+impl fmt::Display for GridDirection {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            GridDirection::North => write!(f, "north"),
+            GridDirection::South => write!(f, "south"),
+            GridDirection::East => write!(f, "east"),
+            GridDirection::West => write!(f, "west"),
+        }
+    }
+}
+
+impl FromStr for GridDirection {
+    type Err = String;
+
+    fn from_str(dir: &str) -> Result<Self, Self::Err> {
+        match dir {
+            "north" => Ok(GridDirection::North),
+            "south" => Ok(GridDirection::South),
+            "east" => Ok(GridDirection::East),
+            "west" => Ok(GridDirection::West),
+            _ => Err(format!("expected direction, got \"{}\"", dir)),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 struct CellData {
     cell: Cell,
@@ -545,6 +602,42 @@ mod tests {
             if let Some(other) = grid.west_of(c) {
                 assert_eq!(grid.is_linked_west(c), grid.is_linked(c, other));
             }
+        }
+    }
+
+    #[test]
+    fn test_grid_directions() {
+        let mut grid = Grid::new(5, 6);
+
+        // Add north, south, east, and west links.
+        let cell = grid.cell(3, 3);
+        grid.link(cell, grid.north_of(cell).unwrap());
+        grid.link(cell, grid.south_of(cell).unwrap());
+        grid.link(cell, grid.east_of(cell).unwrap());
+        grid.link(cell, grid.west_of(cell).unwrap());
+
+        for c in 0..grid.num_cells() {
+            assert_eq!(
+                grid.is_linked_north(c),
+                grid.is_linked_to(c, GridDirection::North)
+            );
+            assert_eq!(
+                grid.is_linked_south(c),
+                grid.is_linked_to(c, GridDirection::South)
+            );
+            assert_eq!(
+                grid.is_linked_east(c),
+                grid.is_linked_to(c, GridDirection::East)
+            );
+            assert_eq!(
+                grid.is_linked_west(c),
+                grid.is_linked_to(c, GridDirection::West)
+            );
+
+            assert_eq!(grid.north_of(c), grid.cell_to(c, GridDirection::North));
+            assert_eq!(grid.south_of(c), grid.cell_to(c, GridDirection::South));
+            assert_eq!(grid.east_of(c), grid.cell_to(c, GridDirection::East));
+            assert_eq!(grid.west_of(c), grid.cell_to(c, GridDirection::West));
         }
     }
 }
