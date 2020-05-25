@@ -353,6 +353,14 @@ impl Grid {
         argmax
     }
 
+    /// Get a list of the dead-end cells in the grid: those cells that link to
+    /// only one other cell
+    pub fn dead_ends(&self) -> Vec<Cell> {
+        (0..self.num_cells)
+            .filter(|c| self.links(*c).len() == 1)
+            .collect()
+    }
+
     /// Returns the longest path through the maze.
     ///
     /// TODO: This could be more efficient, since we end up computing the distances more often
@@ -363,6 +371,8 @@ impl Grid {
         self.shortest_path(start, end)
     }
 
+    /// Renders the maze to an image::RgbaImage, which can then be modified further
+    /// or written to disk.
     pub fn to_image(&self) -> RgbaImage {
         ImageGridRenderer::new()
             .cell_size(10)

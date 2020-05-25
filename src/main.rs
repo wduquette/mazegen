@@ -53,14 +53,22 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     let textmapper = TextGridRenderer::new().auto_width(1).to_owned();
 
     // NEXT, render the maze with distances.
-    out.push_str("Distances from start\n");
+    out.push_str("Distances from start:\n");
     out.push_str(&textmapper.render_with(&grid, |c| dists[c]));
-    out.push('\n');
 
+    // NEXT, render the dead ends.
+    let dead_ends = grid.dead_ends();
+
+    out.push_str("\nDead ends:\n");
+    out.push_str(&textmapper.render_with(&grid, |c| {
+        Some(if dead_ends.contains(&c) { "***" } else { "" })
+    }));
+
+    // NEXT, render the path
     let distpath: HashMap<Cell, usize> =
         cellpath.iter().map(|c| (*c, dists[*c].unwrap())).collect();
 
-    out.push_str("Path, from start to finish\n");
+    out.push_str("\nPath, from start to finish:\n");
     out.push_str(&textmapper.render_with(&grid, |c| distpath.get(&c)));
 
     // NEXT, save an image of the path as temp.png.
@@ -71,7 +79,19 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
             Some(if distpath.contains_key(&c) { 100 } else { 0 })
         });
 
-    if image.save("temp.png").is_err() {
+    if image.save("path.png").is_err() {
+        return molt_err!("error saving grid image");
+    }
+
+    // NEXT, save an image of the grid with dead ends marked
+    let image = ImageGridRenderer::new()
+        .cell_size(30)
+        .border_width(5)
+        .render_with(&grid, |c| {
+            Some(if dead_ends.contains(&c) { 100 } else { 0 })
+        });
+
+    if image.save("dead_ends.png").is_err() {
         return molt_err!("error saving grid image");
     }
 

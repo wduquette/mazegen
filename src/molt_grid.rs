@@ -46,12 +46,13 @@ fn obj_grid(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     interp.call_subcommand(ctx, argv, 1, &OBJ_GRID_SUBCOMMANDS)
 }
 
-const OBJ_GRID_SUBCOMMANDS: [Subcommand; 19] = [
+const OBJ_GRID_SUBCOMMANDS: [Subcommand; 20] = [
     Subcommand("cell", obj_grid_cell),
     Subcommand("cells", obj_grid_cells),
     Subcommand("cellto", obj_grid_cell_to),
     Subcommand("clear", obj_grid_clear),
     Subcommand("cols", obj_grid_cols),
+    Subcommand("deadends", obj_grid_deadends),
     Subcommand("distances", obj_grid_distances),
     Subcommand("i", obj_grid_i),
     Subcommand("ij", obj_grid_ij),
@@ -121,6 +122,21 @@ fn obj_grid_cols(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
     check_args(2, argv, 2, 2, "")?;
     let grid = interp.context::<Grid>(ctx);
     molt_ok!(grid.num_cols() as MoltInt)
+}
+
+// $grid deadends
+//
+// Returns a list of the cells that are dead-ends (i.e., that link to one other cell).
+fn obj_grid_deadends(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 2, 2, "")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    let list: MoltList = grid.dead_ends().iter()
+        .map(|c| Value::from(*c as MoltInt))
+        .collect();
+
+    molt_ok!(list)
 }
 
 // $grid distances *cell* ?-list|-dict?
