@@ -1,4 +1,4 @@
-//! Molt Image Commands
+//! Molt Grid Commands
 use molt::Interp;
 use molt::check_args;
 use molt::molt_err;

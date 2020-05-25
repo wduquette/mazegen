@@ -10,6 +10,7 @@ mod grid;
 mod image_grid_renderer;
 pub mod molt_grid;
 pub mod molt_image;
+pub mod molt_rand;
 mod pixel;
 mod text_grid_renderer;
 

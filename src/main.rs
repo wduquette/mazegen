@@ -24,6 +24,7 @@ fn main() {
     // Install a Molt extension
     mazegen::molt_grid::install(&mut interp);
     mazegen::molt_image::install(&mut interp);
+    mazegen::molt_rand::install(&mut interp);
 
     // NEXT, evaluate the file, if any.
     if args.len() > 1 {
