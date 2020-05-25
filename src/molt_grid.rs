@@ -1,11 +1,12 @@
 //! Molt Grid Commands
-use molt::Interp;
+use crate::Grid;
+use crate::GridDirection;
+use crate::ImageGridRenderer;
 use molt::check_args;
 use molt::molt_err;
 use molt::molt_ok;
 use molt::types::*;
-use crate::Grid;
-use crate::ImageGridRenderer;
+use molt::Interp;
 
 /// Installs the Molt grid commands into the interpreter.
 pub fn install(interp: &mut Interp) {
@@ -45,22 +46,26 @@ fn obj_grid(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     interp.call_subcommand(ctx, argv, 1, &OBJ_GRID_SUBCOMMANDS)
 }
 
-const OBJ_GRID_SUBCOMMANDS: [Subcommand; 15] = [
+const OBJ_GRID_SUBCOMMANDS: [Subcommand; 19] = [
     Subcommand("cell", obj_grid_cell),
     Subcommand("cells", obj_grid_cells),
+    Subcommand("cellto", obj_grid_cell_to),
     Subcommand("clear", obj_grid_clear),
     Subcommand("cols", obj_grid_cols),
     Subcommand("distances", obj_grid_distances),
     Subcommand("i", obj_grid_i),
     Subcommand("ij", obj_grid_ij),
-    Subcommand("islinked", obj_grid_is_linked),
+    Subcommand("linked", obj_grid_linked),
+    Subcommand("linkedto", obj_grid_linked_to),
     Subcommand("j", obj_grid_j),
+    Subcommand("link", obj_grid_link),
     Subcommand("links", obj_grid_links),
     Subcommand("longest", obj_grid_longest),
     Subcommand("neighbors", obj_grid_neighbors),
     Subcommand("render", obj_grid_render),
     Subcommand("rows", obj_grid_rows),
     Subcommand("text", obj_grid_text),
+    Subcommand("unlink", obj_grid_unlink),
 ];
 
 // Converts an (i,j) pair into a cell ID
@@ -81,6 +86,22 @@ fn obj_grid_cells(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRe
     check_args(2, argv, 2, 2, "")?;
     let grid = interp.context::<Grid>(ctx);
     molt_ok!(grid.num_cells() as MoltInt)
+}
+
+// Returns the cell in the given direction, or the empty string if none.
+fn obj_grid_cell_to(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 4, 4, "cell dir")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    let cell = get_grid_cell(grid, &argv[2])?;
+    let dir = get_dir(&argv[3])?;
+
+    if let Some(c) = grid.cell_to(cell, dir) {
+        molt_ok!(c as MoltInt)
+    } else {
+        molt_ok!(Value::empty())
+    }
 }
 
 // Clears the links in the grid.
@@ -127,18 +148,22 @@ fn obj_grid_distances(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> Mo
     };
 
     if as_dict {
-        let dict: MoltDict = grid.distances(cell).iter().enumerate()
-            .map(|(k,v)| (Value::from(k as MoltInt), from_option(*v)))
+        let dict: MoltDict = grid
+            .distances(cell)
+            .iter()
+            .enumerate()
+            .map(|(k, v)| (Value::from(k as MoltInt), from_option(*v)))
             .collect();
         molt_ok!(dict)
     } else {
-        let list: MoltList = grid.distances(cell).iter()
+        let list: MoltList = grid
+            .distances(cell)
+            .iter()
             .map(|c| from_option(*c))
             .collect();
         molt_ok!(list)
     }
 }
-
 
 // Gets the cell's row coordinate given its cell ID
 fn obj_grid_i(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
@@ -164,19 +189,6 @@ fn obj_grid_ij(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResul
     molt_ok!(vec![Value::from(i as MoltInt), Value::from(j as MoltInt)])
 }
 
-// Returns true if the cells are linked, and false otherwise
-fn obj_grid_is_linked(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
-    // Correct number of arguments?
-    check_args(2, argv, 4, 4, "cell1 cell2")?;
-    let grid = interp.context::<Grid>(ctx);
-
-    let cell1 = get_grid_cell(grid, &argv[2])?;
-    let cell2 = get_grid_cell(grid, &argv[3])?;
-
-    molt_ok!(grid.is_linked(cell1, cell2))
-}
-
-
 // Gets the cell's column coordinate given its cell ID
 fn obj_grid_j(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
@@ -188,6 +200,47 @@ fn obj_grid_j(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult
     molt_ok!(grid.j(cell) as MoltInt)
 }
 
+// Links the two cells, which must be neighbors.
+fn obj_grid_link(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 4, 4, "cell1 cell2")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    let cell1 = get_grid_cell(grid, &argv[2])?;
+    let cell2 = get_grid_cell(grid, &argv[3])?;
+
+    if grid.neighbors(cell1).contains(&cell2) {
+        grid.link(cell1, cell2);
+        molt_ok!()
+    } else {
+        molt_err!("not a neighbor of cell {}: \"{}\"", cell1, cell2)
+    }
+}
+
+// Returns true if the cells are linked, and false otherwise
+fn obj_grid_linked(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 4, 4, "cell1 cell2")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    let cell1 = get_grid_cell(grid, &argv[2])?;
+    let cell2 = get_grid_cell(grid, &argv[3])?;
+
+    molt_ok!(grid.is_linked(cell1, cell2))
+}
+
+// Returns true if the cell is linked in the given direction, and false otherwise
+fn obj_grid_linked_to(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 4, 4, "cell dir")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    let cell = get_grid_cell(grid, &argv[2])?;
+    let dir = get_dir(&argv[3])?;
+
+    molt_ok!(grid.is_linked_to(cell, dir))
+}
+
 // Gets a list of the IDs of the cell's linked neighbors
 fn obj_grid_links(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
@@ -196,7 +249,9 @@ fn obj_grid_links(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRe
 
     let cell = get_grid_cell(grid, &argv[2])?;
 
-    let list: MoltList = grid.links(cell).iter()
+    let list: MoltList = grid
+        .links(cell)
+        .iter()
         .map(|c| Value::from(*c as MoltInt))
         .collect();
 
@@ -211,7 +266,9 @@ fn obj_grid_longest(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> Molt
     check_args(2, argv, 2, 2, "")?;
     let grid = interp.context::<Grid>(ctx);
 
-    let list: MoltList = grid.longest_path().iter()
+    let list: MoltList = grid
+        .longest_path()
+        .iter()
         .map(|c| Value::from(*c as MoltInt))
         .collect();
     molt_ok!(list)
@@ -225,7 +282,9 @@ fn obj_grid_neighbors(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> Mo
 
     let cell = get_grid_cell(grid, &argv[2])?;
 
-    let list: MoltList = grid.neighbors(cell).iter()
+    let list: MoltList = grid
+        .neighbors(cell)
+        .iter()
         .map(|c| Value::from(*c as MoltInt))
         .collect();
 
@@ -296,6 +355,23 @@ fn obj_grid_text(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
     molt_ok!(grid.to_string())
 }
 
+// Unlinks the two cells, which must be neighbors.
+fn obj_grid_unlink(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 4, 4, "cell1 cell2")?;
+    let grid = interp.context::<Grid>(ctx);
+
+    let cell1 = get_grid_cell(grid, &argv[2])?;
+    let cell2 = get_grid_cell(grid, &argv[3])?;
+
+    if grid.neighbors(cell1).contains(&cell2) {
+        grid.unlink(cell1, cell2);
+        molt_ok!()
+    } else {
+        molt_err!("not a neighbor of cell {}: \"{}\"", cell1, cell2)
+    }
+}
+
 /// Get a grid row for the given grid.
 fn get_grid_row(grid: &Grid, arg: &Value) -> Result<usize, Exception> {
     let num = arg.as_int()?;
@@ -334,5 +410,15 @@ fn from_option(val: Option<usize>) -> Value {
         Value::from(t as MoltInt)
     } else {
         Value::empty()
+    }
+}
+
+fn get_dir(value: &Value) -> Result<GridDirection, Exception> {
+    if let Some(x) = value.as_copy::<GridDirection>() {
+        Ok(x)
+    } else {
+        Err(Exception::molt_err(Value::from(
+            "expected a grid direction",
+        )))
     }
 }
