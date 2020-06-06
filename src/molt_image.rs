@@ -47,9 +47,10 @@ fn obj_image(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult 
     interp.call_subcommand(ctx, argv, 1, &OBJ_IMAGE_SUBCOMMANDS)
 }
 
-const OBJ_IMAGE_SUBCOMMANDS: [Subcommand; 4] = [
+const OBJ_IMAGE_SUBCOMMANDS: [Subcommand; 5] = [
     Subcommand("clear", obj_image_clear),
     Subcommand("height", obj_image_height),
+    Subcommand("put", obj_image_put),
     Subcommand("save", obj_image_save),
     Subcommand("width", obj_image_width),
 ];
@@ -71,7 +72,7 @@ fn obj_image_clear(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltR
             image.put_pixel(x, y, pixel.ipixel())
         }
     }
-    
+
     molt_ok!()
 }
 
@@ -81,6 +82,26 @@ fn obj_image_height(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> Molt
     check_args(2, argv, 2, 2, "")?;
     let image = interp.context::<RgbaImage>(ctx);
     molt_ok!(image.height() as MoltInt)
+}
+
+// Sets a pixel.
+fn obj_image_put(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 4, 5, "x y ?pixel?")?;
+    let image = interp.context::<RgbaImage>(ctx);
+
+    let x = argv[2].as_int()? as u32;
+    let y = argv[3].as_int()? as u32;
+
+    let pixel: MoltPixel = if argv.len() == 3 {
+        MoltPixel::from_molt(&argv[2])?
+    } else {
+        MoltPixel::rgb(0,0,0) // White
+    };
+
+    image.put_pixel(x, y, pixel.ipixel());
+
+    molt_ok!()
 }
 
 // Saves the content of the image to disk.
