@@ -7,6 +7,8 @@ a convenience and development aid, and to look for rough spots in Molt's Rust AP
 
 **Note:** If you find this interesting, please let me know!
 
+The Molt API is being documented as [The MazeGen Book](https://wduquette.github.io/mazegen/).
+
 The Rust API provides:
 
 * A Grid type for rectangular mazes
