@@ -54,6 +54,7 @@ impl MoltPixel {
     }
 
     /// Get the underlying image::Rgba pixel
+    /// TODO: Should be "inner"?
     pub fn ipixel(&self) -> Rgba<u8> {
         self.ipixel
     }
