@@ -1,0 +1,489 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The MazeGen Book</title>
+        
+        <meta name="robots" content="noindex" />
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="MazeGen Overview and API Reference">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> MazeGen</a></li><li class="chapter-item expanded "><a href="api/overview.html"><strong aria-hidden="true">2.</strong> API Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="api/grid.html"><strong aria-hidden="true">2.1.</strong> grid</a></li><li class="chapter-item expanded "><a href="api/pixel.html"><strong aria-hidden="true">2.2.</strong> pixel</a></li><li class="chapter-item expanded "><a href="api/rand.html"><strong aria-hidden="true">2.3.</strong> rand</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">The MazeGen Book</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                        <a href="https://github.com/wduquette/mazegen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#mazegen" id="mazegen">MazeGen</a></h1>
+<p>MazeGen is a tool for creating Mazes.  It provides both a Rust API (viewable via
+<code>cargo doc</code>) and a <a href="https://github.com/wduquette/molt">Molt API</a> (documented in this book).</p>
+<p>My goals for MazeGen are as follows:</p>
+<ul>
+<li>To provide a use case for Molt, and especially for Molt's Rust API, so that I can find
+rough spots and look for improvements.</li>
+<li>To build some useful bindings for other Rust crates, e.g., <strong>image</strong>.
+<ul>
+<li>Some of these may become crates in their own right.</li>
+</ul>
+</li>
+<li>To learn more about the Rust ecosystem and the crates that are available (Molt goes out of
+its way to avoid dependencies).</li>
+<li>To have fun writing Rust code and playing with mazes.</li>
+</ul>
+<p>Your mileage may vary.</p>
+<h1><a class="header" href="#api-reference" id="api-reference">API Reference</a></h1>
+<p>This section documents MazeGen's <a href="https://github.com/wduquette/molt">Molt API</a>.</p>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="api/grid.html"><strong>grid</strong></a></td><td>Maze grid object</td></tr>
+<tr><td><a href="api/rand.html"><strong>rand</strong></a></td><td>Random number generator</td></tr>
+<tr><td><a href="api/pixel.html"><strong>pixel</strong></a></td><td>Pixel manipulation</td></tr>
+</tbody></table>
+<h1><a class="header" href="#grid----maze-grid-object" id="grid----maze-grid-object">grid -- Maze Grid Object</a></h1>
+<p>A grid, represented in Rust as the <code>Grid</code> struct, is a rectangular array of <em>cells</em>, each of which
+can be linked to the cells north, south, east, and west of it.  The process of creating a maze
+involves &quot;carving out&quot; links within a grid.</p>
+<p>In TCL, a grid is represented as a Molt object: a molt command whose subcommands correspond more
+or less to the methods of the <code>Grid</code> struct.  The <a href="api/grid.html#constructor"><strong>grid</strong> constructor</a> creates
+instances of the grid <a href="api/grid.html#object-command">object command</a>.</p>
+<h2><a class="header" href="#cell-ids-and-coordinates" id="cell-ids-and-coordinates">Cell IDs and Coordinates</a></h2>
+<p>Each cell in the grid has a unique cell ID, an integer from 0 to N-1, where N is the number of
+cells in the grid.  A cell can also be referenced by its (<em>i,j</em>) row/column coordinates.  Cell
+(0,0) is at the top-left; Rows <em>i</em> extend down, and the columns <em>j</em> extend to the right.</p>
+<h2><a class="header" href="#cell-directions" id="cell-directions">Cell Directions</a></h2>
+<p>A cell can have up to four neighbors, which are to the <strong>north</strong>, <strong>south</strong>, <strong>east</strong>, or
+<strong>west</strong>.</p>
+<h2><a class="header" href="#constructor" id="constructor">Constructor</a></h2>
+<p><strong>Syntax: grid <em>name</em> <em>rows</em> <em>cols</em></strong></p>
+<p>The <strong>grid</strong> command creates a grid object, a Molt binding to a Rust <code>Grid</code> struct.  The
+new grid is a Molt command called <em>name</em>; the command provides access to the newly created
+grid, which will have the given number of rows and columns.  Returns the <em>name</em>.</p>
+<pre><code class="language-tcl">$ grid mygrid 10 20
+mygrid
+$ mygrid rows
+10
+$ mygrid cols
+20
+$
+</code></pre>
+<h2><a class="header" href="#object-command" id="object-command">Object Command</a></h2>
+<p><strong>Syntax: <em>grid subcommand</em> ?<em>args</em>...?</strong></p>
+<p>The <em>grid</em> object command has the following subcommands.</p>
+<table><thead><tr><th>Subcommand</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="api/grid.html#grid-cell"><em>grid</em> cell</a></td><td>Converts an <em>i j</em> pair to a cell ID</td></tr>
+<tr><td><a href="api/grid.html#grid-cells"><em>grid</em> cells</a></td><td>The number of cells in the grid</td></tr>
+<tr><td><a href="api/grid.html#grid-cellto"><em>grid</em> cellto</a></td><td>The ID of the cell in a given direction</td></tr>
+<tr><td><a href="api/grid.html#grid-clear"><em>grid</em> clear</a></td><td>Clears the grid, i.e., unlinks all linked cells</td></tr>
+<tr><td><a href="api/grid.html#grid-cols"><em>grid</em> cols</a></td><td>The number of columns in the grid</td></tr>
+<tr><td><a href="api/grid.html#grid-deadends"><em>grid</em> deadends</a></td><td>Cell IDs of dead-end cells</td></tr>
+<tr><td><a href="api/grid.html#grid-distances"><em>grid</em> distances</a></td><td>Distances of all cells from a given cell</td></tr>
+<tr><td><a href="api/grid.html#grid-i"><em>grid</em> i</a></td><td>Converts a cell ID to an <em>i</em> coordinate</td></tr>
+<tr><td><a href="api/grid.html#grid-ij"><em>grid</em> ij</a></td><td>Converts a cell ID to an <em>i j</em> pair</td></tr>
+<tr><td><a href="api/grid.html#grid-j"><em>grid</em> j</a></td><td>Converts a cell ID to a <em>j</em> coordinate</td></tr>
+<tr><td><a href="api/grid.html#grid-linked"><em>grid</em> linked</a></td><td>Are two cells linked?</td></tr>
+<tr><td><a href="api/grid.html#grid-linkedto"><em>grid</em> linkedto</a></td><td>Is a cell linked to the cell in a given direction?</td></tr>
+<tr><td><a href="api/grid.html#grid-link"><em>grid</em> link</a></td><td>Links two adjacent cells</td></tr>
+<tr><td><a href="api/grid.html#grid-links"><em>grid</em> links</a></td><td>The cells to which a cell is linked</td></tr>
+<tr><td><a href="api/grid.html#grid-longest"><em>grid</em> longest</a></td><td>The longest path in the grid</td></tr>
+<tr><td><a href="api/grid.html#grid-neighbors"><em>grid</em> neighbors</a></td><td>The cells adjacent to a given cell</td></tr>
+<tr><td><a href="api/grid.html#grid-render"><em>grid</em> render</a></td><td>Render an image that depicts the grid</td></tr>
+<tr><td><a href="api/grid.html#grid-rows"><em>grid</em> rows</a></td><td>The number of rows in the grid</td></tr>
+<tr><td><a href="api/grid.html#grid-text"><em>grid</em> text</a></td><td>Render a string that depicts the grid</td></tr>
+<tr><td><a href="api/grid.html#grid-unlink"><em>grid</em> unlink</a></td><td>Unlink two adjacent cells</td></tr>
+</tbody></table>
+<h3><a class="header" href="#grid-cell" id="grid-cell"><em>grid</em> cell</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> cell <em>i j</em></strong></p>
+<p>Returns the cell ID corresponding to row <em>i</em>, column <em>j</em>.  Rows are indexed from 0 to M-1,
+and columns are indexed from 0 to N-1.</p>
+<h3><a class="header" href="#grid-cells" id="grid-cells"><em>grid</em> cells</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> cells</strong></p>
+<p>Returns the number of cells in the grid.</p>
+<h3><a class="header" href="#grid-cellto" id="grid-cellto"><em>grid</em> cellto</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> cellto <em>cell</em> north|south|east|west</strong></p>
+<p>Returns the ID of the cell to the <strong>north</strong>, <strong>south</strong>, <strong>east</strong> or <strong>west</strong> of the given <em>cell</em>,
+or the empty string if there is no such cell.</p>
+<h3><a class="header" href="#grid-clear" id="grid-clear"><em>grid</em> clear</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> clear</strong></p>
+<p>Clears all links from the grid, returning it to its initial state.</p>
+<h3><a class="header" href="#grid-cols" id="grid-cols"><em>grid</em> cols</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> cols</strong></p>
+<p>Returns the number of columns in the grid.</p>
+<h3><a class="header" href="#grid-deadends" id="grid-deadends"><em>grid</em> deadends</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> deadends</strong></p>
+<p>Returns a list of the IDs of all dead-end cells in the grid.  A cell is a dead-end if it
+is linked to only one other cell.</p>
+<h3><a class="header" href="#grid-distances" id="grid-distances"><em>grid</em> distances</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> distances <em>cell</em> -list|-dict</strong></p>
+<p>Computes the minimum distance from the given <em>cell</em> to every other cell.  By default, or if the
+<code>-list</code> option is given, returns a list of distances by cell ID.  If the <code>-dict</code> option is given,
+returns a Molt dictionary of distances by cell ID.</p>
+<pre><code class="language-tcl">$ set list [$grid distances 0]                   ;# Distances from cell 0 as a list
+$ set to35 [lindex $list 35]                     ;# Distance from 0 to cell 35
+$ array set distances [grid distances 0 -dict]   ;# Distances from cell 0 as a dict
+$ set to35 $distances(35)                        ;# Distance from 0 to cell 35
+</code></pre>
+<h3><a class="header" href="#grid-i" id="grid-i"><em>grid</em> i</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> i <em>cell</em></strong></p>
+<p>Gets the row index of the <em>cell</em> with the given ID.</p>
+<h3><a class="header" href="#grid-ij" id="grid-ij"><em>grid</em> ij</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> ij <em>cell</em></strong></p>
+<p>Gets the row/column coordinates of the <em>cell</em> with the given ID as a two-element list.</p>
+<pre><code class="language-tcl">$ set pair [$grid ij 35]      ;# Get the I/J coordinates of cell 35
+$ set i [lindex $pair 0]
+$ set j [lindex $pair 1]
+$ lassign [$grid ij 35] i j   ;# Once Molt implements lassign
+</code></pre>
+<h3><a class="header" href="#grid-j" id="grid-j"><em>grid</em> j</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> j <em>cell</em></strong></p>
+<p>Gets the column index of the <em>cell</em> with the given ID.</p>
+<h3><a class="header" href="#grid-link" id="grid-link"><em>grid</em> link</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> link <em>cell1 cell2</em></strong></p>
+<p>Links the cell <em>cell1</em> to <em>cell2</em> given their IDs.  The two cells must be adjacent.  Note:
+links are always bidirectional.</p>
+<pre><code class="language-tcl">$ $grid link $cell1 $cell2
+$ $grid linked $cell1 $cell2
+1
+$ $grid linked $cell2 $cell1
+1
+</code></pre>
+<h3><a class="header" href="#grid-linked" id="grid-linked"><em>grid</em> linked</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> linked <em>cell1 cell2</em></strong></p>
+<p>Returns true if cell <em>cell1</em> is linked to <em>cell2</em>, given their IDs, and false otherwise.</p>
+<h3><a class="header" href="#grid-linkedto" id="grid-linkedto"><em>grid</em> linkedto</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> linkedto <em>cell</em> north|south|east|west</strong></p>
+<p>Returns true if the given <em>cell</em> is linked to its neighbor in the given direction.</p>
+<h3><a class="header" href="#grid-links" id="grid-links"><em>grid</em> links</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> links <em>cell</em></strong></p>
+<p>Returns a list of the IDs of the cells that are linked to the given <em>cell</em>.</p>
+<h3><a class="header" href="#grid-longest" id="grid-longest"><em>grid</em> longest</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> longest</strong></p>
+<p>Returns the longest path through the grid as a list of cell IDs.</p>
+<h3><a class="header" href="#grid-neighbors" id="grid-neighbors"><em>grid</em> neighbors</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> neighbors <em>cell</em></strong></p>
+<p>Returns a list of the IDs of the cells that are neighbors of the given <em>cell</em>.</p>
+<h3><a class="header" href="#grid-render" id="grid-render"><em>grid</em> render</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> render <em>filename</em> ?<em>options...</em>?</strong></p>
+<p>Renders the grid as an image, saving it to the file with the given name.  Valid options are as follows:</p>
+<table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><strong>-cellsize <em>pixels</em></strong></td><td>A cell's height and width in pixels.  Defaults to 10.</td></tr>
+<tr><td><strong>-borderwidth <em>pixels</em></strong></td><td>The width of the border between cells, in pixels.  Defaults to 1.</td></tr>
+</tbody></table>
+<h3><a class="header" href="#grid-rows" id="grid-rows"><em>grid</em> rows</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> rows</strong></p>
+<p>Returns the number of rows in the grid.</p>
+<h3><a class="header" href="#grid-text" id="grid-text"><em>grid</em> text</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> text</strong></p>
+<p>Returns a string that represents the maze in ASCII characters.  TODO: needs the ability
+to add labels to cells.</p>
+<pre><code class="language-tcl">$ grid mygrid 3 5
+...
+$ mygrid text
++---+---+---+---+---+
+|       |   |       |
++   +   +   +---+   +
+|   |       |       |
++   +---+---+   +---+
+|                   |
++---+---+---+---+---+
+</code></pre>
+<h3><a class="header" href="#grid-unlink" id="grid-unlink"><em>grid</em> unlink</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> unlink <em>cell1 cell2</em></strong></p>
+<p>Unlinks the two cells (if they were linked).  The two cells must be adjacent.  Note:
+all links are bidirectional; unlinking <em>cell1</em> from <em>cell2</em> also unlinks <em>cell2</em> from <em>cell1</em>.</p>
+<h1><a class="header" href="#pixel----pixel-manipulation" id="pixel----pixel-manipulation">pixel -- Pixel Manipulation</a></h1>
+<p><strong>Syntax: pixel <em>subcommand</em> ?<em>args</em>...?</strong></p>
+<p>The <strong>pixel</strong> command provides access to the <strong>image</strong> crate's <code>Rgba</code> pixel type: red/green/blue
+plus the alpha channel.  This is useful for creating pixel art.</p>
+<table><thead><tr><th>Subcommand</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="api/pixel.html#pixel-from">pixel from</a></td><td>Constructs a pixel from components</td></tr>
+<tr><td><a href="api/pixel.html#pixel-red">pixel red</a></td><td>Extracts the red component from a pixel</td></tr>
+<tr><td><a href="api/pixel.html#pixel-green">pixel green</a></td><td>Extracts the green component from a pixel</td></tr>
+<tr><td><a href="api/pixel.html#pixel-blue">pixel blue</a></td><td>Extracts the blue component from a pixel</td></tr>
+<tr><td><a href="api/pixel.html#pixel-alpha">pixel alpha</a></td><td>Extracts the alpha component from a pixel</td></tr>
+</tbody></table>
+<h2><a class="header" href="#pixel-representation" id="pixel-representation">Pixel Representation</a></h2>
+<p>The string representation of a pixel is a standard web RGB hex string, one byte per color, with
+an optional suffix for the alpha channel: &quot;#<em>rrggbb</em>?.<em>aa</em>?&quot;.  Some examples:</p>
+<ul>
+<li><code>#000000</code> black, alpha is 255</li>
+<li><code>#00ff00</code> green, alpha is 255</li>
+<li><code>#ffffff</code> white, alpha is 255</li>
+<li><code>#ffffff.ff</code> white, alpha is 255</li>
+<li><code>#ffffff.00</code> white, alpha is 0 (fully transparent)</li>
+<li><code>#ffffff.80</code> white, alpha is 128 (half transparent)</li>
+</ul>
+<p>The hex digits are case-insensitive.</p>
+<p>Note: the &quot;.&quot; is a little odd; but it simplifies the logic if we allow large pixel components
+in the future.  Without the &quot;.&quot;,  &quot;#0123456789AB&quot; could be interpreted as three RGB values,
+&quot;0123&quot;, &quot;4567&quot;, and &quot;89AB&quot;, or three RGB values and an alpha, &quot;012&quot;, &quot;345&quot;, &quot;678&quot;, &quot;9AB&quot;.</p>
+<h2><a class="header" href="#pixel-from" id="pixel-from">pixel from</a></h2>
+<hr />
+<p><strong>Syntax: pixel from <em>r g b</em> ?<em>a</em>?</strong></p>
+<p>Constructs a pixel value given its red, green, blue, and alpha components as integers from
+0 to 255.  If omitted, the alpha component defaults to 255.  Returns the pixel value.</p>
+<h2><a class="header" href="#pixel-red" id="pixel-red">pixel red</a></h2>
+<hr />
+<p><strong>Syntax: pixel red <em>pixel</em></strong></p>
+<p>Extracts the red component from a pixel as an integer.</p>
+<h2><a class="header" href="#pixel-green" id="pixel-green">pixel green</a></h2>
+<hr />
+<p><strong>Syntax: pixel green <em>pixel</em></strong></p>
+<p>Extracts the green component from a pixel as an integer.</p>
+<h2><a class="header" href="#pixel-blue" id="pixel-blue">pixel blue</a></h2>
+<hr />
+<p><strong>Syntax: pixel blue <em>pixel</em></strong></p>
+<p>Extracts the blue component from a pixel as an integer.</p>
+<h2><a class="header" href="#pixel-alpha" id="pixel-alpha">pixel alpha</a></h2>
+<hr />
+<p><strong>Syntax: pixel alpha <em>pixel</em></strong></p>
+<p>Extracts the alpha component from a pixel as an integer.</p>
+<h1><a class="header" href="#rand----random-number-generator" id="rand----random-number-generator">rand -- Random Number Generator</a></h1>
+<p><strong>Syntax: rand <em>subcommand</em> ?<em>args</em>...?</strong></p>
+<p>The <strong>rand</strong> command provides access to the <strong>rand</strong> crate's <code>thread_rng</code>.  It has the
+following subcommands.</p>
+<table><thead><tr><th>Subcommand</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="api/rand.html#rand-bool">rand bool</a></td><td>Generates a random boolean</td></tr>
+<tr><td><a href="api/rand.html#rand-range">rand range</a></td><td>Generates an integer from a range</td></tr>
+<tr><td><a href="api/rand.html#rand-sample">rand sample</a></td><td>Selects an item randomly from a list</td></tr>
+</tbody></table>
+<h2><a class="header" href="#rand-bool" id="rand-bool">rand bool</a></h2>
+<hr />
+<p><strong>Syntax: rand bool ?<em>prob</em>?</strong></p>
+<p>Returns either a 1 or 0, both with probability 0.5.  If given, <em>prob</em> must be a number
+between 0.0 and 1.0 indicating the probability of getting a 1.</p>
+<p>TODO: Rejects <em>prob</em> if it is exactly 0.0 or 1.0.  That might be a nuisance.</p>
+<h2><a class="header" href="#rand-range" id="rand-range">rand range</a></h2>
+<hr />
+<p><strong>Syntax: rand range ?<em>start</em>? <em>end</em></strong></p>
+<p>Randomly selects and returns a number in the range <em>start</em> to (<em>end</em> - 1).  The <em>start</em> value
+defaults to 0.</p>
+<h2><a class="header" href="#rand-sample" id="rand-sample">rand sample</a></h2>
+<hr />
+<p><strong>Syntax: rand sample <em>list...</em></strong></p>
+<p>Randomly selects and returns an element from a list.  The list can be provided as a single value,
+or as multiple elements on the command line, i.e., the two calls shown below both return a
+random letter &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, or &quot;e&quot;.</p>
+<pre><code class="language-tcl">rand sample a b c d e
+
+set list [list a b c d e]
+rand sample $list
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+        
+        
+        <script type="text/javascript">
+            window.playpen_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+        
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+        
+        
+
+    </body>
+</html>

@@ -28,7 +28,7 @@ const RAND_SUBCOMMANDS: [Subcommand; 3] = [
 // Returns `1` or `0`, with `1` having the given probability, which defaults to 0.5.
 fn cmd_rand_bool(_: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
-    check_args(2, argv, 2, 3, "?heads?")?;
+    check_args(2, argv, 2, 3, "?prob?")?;
 
     let prob = if argv.len() == 3 {
         argv[2].as_float()?
@@ -64,7 +64,7 @@ fn cmd_rand_range(_: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
 
 // rand range *list...*
 //
-// Randoms a random selection from the list, which may be passed as a single argument
+// Makes a random selection from the list, which may be passed as a single argument
 // or as multiple arguments.
 fn cmd_rand_sample(_: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?

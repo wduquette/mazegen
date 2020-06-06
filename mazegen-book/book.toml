@@ -1,0 +1,14 @@
+[book]
+authors = ["Will Duquette"]
+language = "en"
+multilingual = false
+src = "src"
+title = "The MazeGen Book"
+description = "MazeGen Overview and API Reference"
+
+[build]
+build-dir = "../docs"
+
+[output.html]
+theme = "src/theme"
+git-repository-url = "https://github.com/wduquette/mazegen"
