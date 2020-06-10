@@ -1,4 +1,4 @@
-# pixel -- Pixel Manipulation
+# pixel -- Pixel Type
 
 **Syntax: pixel *subcommand* ?*args*...?**
 

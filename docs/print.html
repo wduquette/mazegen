@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> MazeGen</a></li><li class="chapter-item expanded "><a href="api/overview.html"><strong aria-hidden="true">2.</strong> API Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="api/grid.html"><strong aria-hidden="true">2.1.</strong> grid</a></li><li class="chapter-item expanded "><a href="api/pixel.html"><strong aria-hidden="true">2.2.</strong> pixel</a></li><li class="chapter-item expanded "><a href="api/rand.html"><strong aria-hidden="true">2.3.</strong> rand</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> MazeGen</a></li><li class="chapter-item expanded "><a href="api/overview.html"><strong aria-hidden="true">2.</strong> API Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="api/grid.html"><strong aria-hidden="true">2.1.</strong> grid</a></li><li class="chapter-item expanded "><a href="api/image.html"><strong aria-hidden="true">2.2.</strong> image</a></li><li class="chapter-item expanded "><a href="api/pixel.html"><strong aria-hidden="true">2.3.</strong> pixel</a></li><li class="chapter-item expanded "><a href="api/rand.html"><strong aria-hidden="true">2.4.</strong> rand</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -174,8 +174,9 @@ its way to avoid dependencies).</li>
 <p>This section documents MazeGen's <a href="https://github.com/wduquette/molt">Molt API</a>.</p>
 <table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
 <tr><td><a href="api/grid.html"><strong>grid</strong></a></td><td>Maze grid object</td></tr>
+<tr><td><a href="api/image.html"><strong>image</strong></a></td><td>Image object</td></tr>
 <tr><td><a href="api/rand.html"><strong>rand</strong></a></td><td>Random number generator</td></tr>
-<tr><td><a href="api/pixel.html"><strong>pixel</strong></a></td><td>Pixel manipulation</td></tr>
+<tr><td><a href="api/pixel.html"><strong>pixel</strong></a></td><td>Pixel type</td></tr>
 </tbody></table>
 <h1><a class="header" href="#grid----maze-grid-object" id="grid----maze-grid-object">grid -- Maze Grid Object</a></h1>
 <p>A grid, represented in Rust as the <code>Grid</code> struct, is a rectangular array of <em>cells</em>, each of which
@@ -348,7 +349,66 @@ $ mygrid text
 <p><strong>Syntax: <em>grid</em> unlink <em>cell1 cell2</em></strong></p>
 <p>Unlinks the two cells (if they were linked).  The two cells must be adjacent.  Note:
 all links are bidirectional; unlinking <em>cell1</em> from <em>cell2</em> also unlinks <em>cell2</em> from <em>cell1</em>.</p>
-<h1><a class="header" href="#pixel----pixel-manipulation" id="pixel----pixel-manipulation">pixel -- Pixel Manipulation</a></h1>
+<h1><a class="header" href="#image----image-object" id="image----image-object">image -- Image Object</a></h1>
+<p>An image object is a Molt object that wraps an <code>RgbaImage</code> from the
+<a href="https://github.com/image-rs/image"><strong>image</strong> crate</a> and allows it to be manipulated in
+various ways.  The <a href="api/image.html#constructor"><strong>image</strong> constructor</a> creates
+instances of the image <a href="api/image.html#object-command">object command</a>.</p>
+<h2><a class="header" href="#pixels" id="pixels">Pixels</a></h2>
+<p>Pixels are represented as Molt pixel values; see the <a href="api/pixel.html"><strong>pixel</strong></a> command for more
+details.</p>
+<h2><a class="header" href="#constructor-1" id="constructor-1">Constructor</a></h2>
+<p><strong>Syntax: image <em>name</em> <em>width</em> <em>height</em></strong></p>
+<p>The <strong>image</strong> command creates an image object, a Molt binding to a Rust <code>RgbaImage</code> struct.  The
+new image object is a Molt command called <em>name</em>; the command provides access to the newly created
+image, which will have the given width and height in pixels.  Returns the <em>name</em>.</p>
+<pre><code class="language-tcl">$ image myimage 32 32
+myimage
+$ myimage width
+32
+$ myimage height
+32
+$
+</code></pre>
+<h2><a class="header" href="#object-command-1" id="object-command-1">Object Command</a></h2>
+<p><strong>Syntax: <em>image subcommand</em> ?<em>args</em>...?</strong></p>
+<p>The <em>image</em> object command has the following subcommands.</p>
+<table><thead><tr><th>Subcommand</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="api/image.html#image-clear"><em>image</em> clear</a></td><td>Clears an image to a given color</td></tr>
+<tr><td><a href="api/image.html#image-height"><em>image</em> height</a></td><td>An image's height in pixels</td></tr>
+<tr><td><a href="api/image.html#image-put"><em>image</em> put</a></td><td>Sets a pixel in the image</td></tr>
+<tr><td><a href="api/image.html#image-save"><em>image</em> save</a></td><td>Saves the image to disk</td></tr>
+<tr><td><a href="api/image.html#image-width"><em>image</em> width</a></td><td>An image's width in pixels</td></tr>
+</tbody></table>
+<h3><a class="header" href="#image-clear" id="image-clear"><em>image</em> clear</a></h3>
+<hr />
+<p><strong>Syntax: <em>image</em> clear ?<em>fill</em>?</strong></p>
+<p>Clears the image's pixels by setting them to the given <em>fill</em> color, which must be a
+<a href="api/pixel.html"><strong>pixel</strong></a> value.  The <em>fill</em> defaults to white, <code>#FFFFFF</code>.</p>
+<pre><code class="language-tcl">$image clear #000000    ;# Clear to black
+$image clear #000000.00 ;# Clear to transparent
+</code></pre>
+<h3><a class="header" href="#image-height" id="image-height"><em>image</em> height</a></h3>
+<hr />
+<p><strong>Syntax: <em>image</em> height</strong></p>
+<p>Returns an image's height in pixels.</p>
+<h3><a class="header" href="#image-put" id="image-put"><em>image</em> put</a></h3>
+<hr />
+<p><strong>Syntax: <em>image</em> put <em>x y</em> ?<em>pixel</em>?</strong></p>
+<p>Sets the pixel at the given (<em>x</em>,<em>y</em>) coordinates to the given <em>pixel</em> value, which defaults to
+black, <code>#000000</code>.</p>
+<pre><code class="language-tcl">$image put 10 15 #0000FF   ;# Set pixel at 10,15 to blue
+</code></pre>
+<h3><a class="header" href="#image-save" id="image-save"><em>image</em> save</a></h3>
+<hr />
+<p><strong>Syntax: <em>image</em> save <em>filename</em></strong></p>
+<p>Attempts to save the the image to the given file.  The image type is determined by the
+<a href="https://github.com/image-rs/image"><strong>image</strong> crate</a> from the file's file type.</p>
+<h3><a class="header" href="#image-width" id="image-width"><em>image</em> width</a></h3>
+<hr />
+<p><strong>Syntax: <em>image</em> width</strong></p>
+<p>Returns an image's width in pixels.</p>
+<h1><a class="header" href="#pixel----pixel-type" id="pixel----pixel-type">pixel -- Pixel Type</a></h1>
 <p><strong>Syntax: pixel <em>subcommand</em> ?<em>args</em>...?</strong></p>
 <p>The <strong>pixel</strong> command provides access to the <strong>image</strong> crate's <code>Rgba</code> pixel type: red/green/blue
 plus the alpha channel.  This is useful for creating pixel art.</p>

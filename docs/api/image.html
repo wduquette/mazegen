@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>rand - The MazeGen Book</title>
+        <title>image - The MazeGen Book</title>
         
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../overview.html"><strong aria-hidden="true">1.</strong> MazeGen</a></li><li class="chapter-item expanded "><a href="../api/overview.html"><strong aria-hidden="true">2.</strong> API Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../api/grid.html"><strong aria-hidden="true">2.1.</strong> grid</a></li><li class="chapter-item expanded "><a href="../api/image.html"><strong aria-hidden="true">2.2.</strong> image</a></li><li class="chapter-item expanded "><a href="../api/pixel.html"><strong aria-hidden="true">2.3.</strong> pixel</a></li><li class="chapter-item expanded "><a href="../api/rand.html" class="active"><strong aria-hidden="true">2.4.</strong> rand</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../overview.html"><strong aria-hidden="true">1.</strong> MazeGen</a></li><li class="chapter-item expanded "><a href="../api/overview.html"><strong aria-hidden="true">2.</strong> API Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../api/grid.html"><strong aria-hidden="true">2.1.</strong> grid</a></li><li class="chapter-item expanded "><a href="../api/image.html" class="active"><strong aria-hidden="true">2.2.</strong> image</a></li><li class="chapter-item expanded "><a href="../api/pixel.html"><strong aria-hidden="true">2.3.</strong> pixel</a></li><li class="chapter-item expanded "><a href="../api/rand.html"><strong aria-hidden="true">2.4.</strong> rand</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -151,48 +151,80 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#rand----random-number-generator" id="rand----random-number-generator">rand -- Random Number Generator</a></h1>
-<p><strong>Syntax: rand <em>subcommand</em> ?<em>args</em>...?</strong></p>
-<p>The <strong>rand</strong> command provides access to the <strong>rand</strong> crate's <code>thread_rng</code>.  It has the
-following subcommands.</p>
-<table><thead><tr><th>Subcommand</th><th>Description</th></tr></thead><tbody>
-<tr><td><a href="#rand-bool">rand bool</a></td><td>Generates a random boolean</td></tr>
-<tr><td><a href="#rand-range">rand range</a></td><td>Generates an integer from a range</td></tr>
-<tr><td><a href="#rand-sample">rand sample</a></td><td>Selects an item randomly from a list</td></tr>
-</tbody></table>
-<h2><a class="header" href="#rand-bool" id="rand-bool">rand bool</a></h2>
-<hr />
-<p><strong>Syntax: rand bool ?<em>prob</em>?</strong></p>
-<p>Returns either a 1 or 0, both with probability 0.5.  If given, <em>prob</em> must be a number
-between 0.0 and 1.0 indicating the probability of getting a 1.</p>
-<p>TODO: Rejects <em>prob</em> if it is exactly 0.0 or 1.0.  That might be a nuisance.</p>
-<h2><a class="header" href="#rand-range" id="rand-range">rand range</a></h2>
-<hr />
-<p><strong>Syntax: rand range ?<em>start</em>? <em>end</em></strong></p>
-<p>Randomly selects and returns a number in the range <em>start</em> to (<em>end</em> - 1).  The <em>start</em> value
-defaults to 0.</p>
-<h2><a class="header" href="#rand-sample" id="rand-sample">rand sample</a></h2>
-<hr />
-<p><strong>Syntax: rand sample <em>list...</em></strong></p>
-<p>Randomly selects and returns an element from a list.  The list can be provided as a single value,
-or as multiple elements on the command line, i.e., the two calls shown below both return a
-random letter &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, or &quot;e&quot;.</p>
-<pre><code class="language-tcl">rand sample a b c d e
-
-set list [list a b c d e]
-rand sample $list
+                        <h1><a class="header" href="#image----image-object" id="image----image-object">image -- Image Object</a></h1>
+<p>An image object is a Molt object that wraps an <code>RgbaImage</code> from the
+<a href="https://github.com/image-rs/image"><strong>image</strong> crate</a> and allows it to be manipulated in
+various ways.  The <a href="#constructor"><strong>image</strong> constructor</a> creates
+instances of the image <a href="#object-command">object command</a>.</p>
+<h2><a class="header" href="#pixels" id="pixels">Pixels</a></h2>
+<p>Pixels are represented as Molt pixel values; see the <a href="pixel.html"><strong>pixel</strong></a> command for more
+details.</p>
+<h2><a class="header" href="#constructor" id="constructor">Constructor</a></h2>
+<p><strong>Syntax: image <em>name</em> <em>width</em> <em>height</em></strong></p>
+<p>The <strong>image</strong> command creates an image object, a Molt binding to a Rust <code>RgbaImage</code> struct.  The
+new image object is a Molt command called <em>name</em>; the command provides access to the newly created
+image, which will have the given width and height in pixels.  Returns the <em>name</em>.</p>
+<pre><code class="language-tcl">$ image myimage 32 32
+myimage
+$ myimage width
+32
+$ myimage height
+32
+$
 </code></pre>
+<h2><a class="header" href="#object-command" id="object-command">Object Command</a></h2>
+<p><strong>Syntax: <em>image subcommand</em> ?<em>args</em>...?</strong></p>
+<p>The <em>image</em> object command has the following subcommands.</p>
+<table><thead><tr><th>Subcommand</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="#image-clear"><em>image</em> clear</a></td><td>Clears an image to a given color</td></tr>
+<tr><td><a href="#image-height"><em>image</em> height</a></td><td>An image's height in pixels</td></tr>
+<tr><td><a href="#image-put"><em>image</em> put</a></td><td>Sets a pixel in the image</td></tr>
+<tr><td><a href="#image-save"><em>image</em> save</a></td><td>Saves the image to disk</td></tr>
+<tr><td><a href="#image-width"><em>image</em> width</a></td><td>An image's width in pixels</td></tr>
+</tbody></table>
+<h3><a class="header" href="#image-clear" id="image-clear"><em>image</em> clear</a></h3>
+<hr />
+<p><strong>Syntax: <em>image</em> clear ?<em>fill</em>?</strong></p>
+<p>Clears the image's pixels by setting them to the given <em>fill</em> color, which must be a
+<a href="pixel.html"><strong>pixel</strong></a> value.  The <em>fill</em> defaults to white, <code>#FFFFFF</code>.</p>
+<pre><code class="language-tcl">$image clear #000000    ;# Clear to black
+$image clear #000000.00 ;# Clear to transparent
+</code></pre>
+<h3><a class="header" href="#image-height" id="image-height"><em>image</em> height</a></h3>
+<hr />
+<p><strong>Syntax: <em>image</em> height</strong></p>
+<p>Returns an image's height in pixels.</p>
+<h3><a class="header" href="#image-put" id="image-put"><em>image</em> put</a></h3>
+<hr />
+<p><strong>Syntax: <em>image</em> put <em>x y</em> ?<em>pixel</em>?</strong></p>
+<p>Sets the pixel at the given (<em>x</em>,<em>y</em>) coordinates to the given <em>pixel</em> value, which defaults to
+black, <code>#000000</code>.</p>
+<pre><code class="language-tcl">$image put 10 15 #0000FF   ;# Set pixel at 10,15 to blue
+</code></pre>
+<h3><a class="header" href="#image-save" id="image-save"><em>image</em> save</a></h3>
+<hr />
+<p><strong>Syntax: <em>image</em> save <em>filename</em></strong></p>
+<p>Attempts to save the the image to the given file.  The image type is determined by the
+<a href="https://github.com/image-rs/image"><strong>image</strong> crate</a> from the file's file type.</p>
+<h3><a class="header" href="#image-width" id="image-width"><em>image</em> width</a></h3>
+<hr />
+<p><strong>Syntax: <em>image</em> width</strong></p>
+<p>Returns an image's width in pixels.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                         
-                            <a rel="prev" href="../api/pixel.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../api/grid.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
 
+                        
+                            <a rel="next" href="../api/pixel.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
                         
 
                         <div style="clear: both"></div>
@@ -202,11 +234,15 @@ rand sample $list
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
-                    <a rel="prev" href="../api/pixel.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../api/grid.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
 
+                
+                    <a rel="next" href="../api/pixel.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
                 
             </nav>
 
