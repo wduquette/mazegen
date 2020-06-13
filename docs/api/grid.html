@@ -303,19 +303,50 @@ $ $grid linked $cell2 $cell1
 <p>Returns the number of rows in the grid.</p>
 <h3><a class="header" href="#grid-text" id="grid-text"><em>grid</em> text</a></h3>
 <hr />
-<p><strong>Syntax: <em>grid</em> text</strong></p>
-<p>Returns a string that represents the maze in ASCII characters.  TODO: needs the ability
-to add labels to cells.</p>
+<p><strong>Syntax: <em>grid</em> text ?<em>options...</em>?</strong></p>
+<p>Returns a string that represents the maze in ASCII characters.  The options are as follows:</p>
+<table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><strong>-cellwidth <em>chars</em></strong></td><td>A cell's width in monospace characters.  Defaults to 3.</td></tr>
+<tr><td><strong>-autowidth <em>margin</em></strong></td><td>Size cells to the data, leaving a <em>margin</em>.  Defaults to 1.</td></tr>
+<tr><td><strong>-datalist  <em>list</em></strong></td><td>A list of data strings to include in each cell</td></tr>
+<tr><td><strong>-datadict  <em>dict</em></strong></td><td>A dictionary of data strings to include in each cell</td></tr>
+</tbody></table>
+<p>The caller can provide data to be written into the cells. The data is given in one of two forms:</p>
+<ul>
+<li>
+<p>As a <strong>-datalist</strong>, a list containing one value for each cell in the grid; the list index
+is used as the cell ID.  To leave a cell empty, set the corresponding list item to the empty
+string.</p>
+</li>
+<li>
+<p>As a <strong>-datadict</strong>, a dictionary of values by cell ID.  To leave a cell empty, set its value
+to the empty string or omit its ID from the dictionary.</p>
+</li>
+</ul>
+<p>The <strong>-cellwidth</strong> gives the actual width of each cell in monospace characters; if data is
+given, it will be truncated to fit the width.  If <strong>-autowidth</strong> is also given, the width will
+be set to the length of the longest value plus twice the <em>margin</em>, so that the data can be
+presented without truncation.  In this case, the <strong>-cellwidth</strong> becomes the minimum width.</p>
 <pre><code class="language-tcl">$ grid mygrid 3 5
 ...
 $ mygrid text
 +---+---+---+---+---+
-|       |   |       |
-+   +   +   +---+   +
-|   |       |       |
-+   +---+---+   +---+
 |                   |
++   +---+---+   +   +
+|   |       |   |   |
++   +---+   +---+   +
+|           |       |
 +---+---+---+---+---+
+
+$ mygrid text -autowidth 1 -datalist [mygrid distances 0]
++---+---+---+---+---+
+| 0   1   2   3   4 |
++   +---+---+   +   +
+| 1 | 6   5 | 4 | 5 |
++   +---+   +---+   +
+| 2   3   4 | 7   6 |
++---+---+---+---+---+
+$
 </code></pre>
 <h3><a class="header" href="#grid-unlink" id="grid-unlink"><em>grid</em> unlink</a></h3>
 <hr />
