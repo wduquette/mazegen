@@ -209,10 +209,30 @@ Returns the number of rows in the grid.
 
 ### *grid* text
 ---
-**Syntax: *grid* text**
+**Syntax: *grid* text ?*options...*?**
 
-Returns a string that represents the maze in ASCII characters.  TODO: needs the ability
-to add labels to cells.
+Returns a string that represents the maze in ASCII characters.  The options are as follows:
+
+| Option                    | Description |
+| ------------------------- | ----------- |
+| **-cellwidth *chars***    | A cell's width in monospace characters.  Defaults to 3. |
+| **-autowidth *margin***   | Size cells to the data, leaving a *margin*.  Defaults to 1. |
+| **-datalist  *list***     | A list of data strings to include in each cell |
+| **-datadict  *dict***     | A dictionary of data strings to include in each cell |
+
+The caller can provide data to be written into the cells. The data is given in one of two forms:
+
+* As a **-datalist**, a list containing one value for each cell in the grid; the list index
+  is used as the cell ID.  To leave a cell empty, set the corresponding list item to the empty
+  string.
+
+* As a **-datadict**, a dictionary of values by cell ID.  To leave a cell empty, set its value
+  to the empty string or omit its ID from the dictionary.
+
+The **-cellwidth** gives the actual width of each cell in monospace characters; if data is
+given, it will be truncated to fit the width.  If **-autowidth** is also given, the width will
+be set to the length of the longest value plus twice the *margin*, so that the data can be
+presented without truncation.  In this case, the **-cellwidth** becomes the minimum width.
 
 ```tcl
 $ grid mygrid 3 5
