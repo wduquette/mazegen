@@ -121,7 +121,11 @@ impl TextGridRenderer {
 
     fn write_cell<T: Display>(&self, buff: &mut String, value: &T, width: usize) {
         // FIRST, format the data on a field with the given width.
-        buff.push_str(&format!("{datum:^width$}", datum = value, width = width));
+        let mut val = format!("{datum:^width$}", datum = value, width = width);
+        if val.chars().count() > width {
+            val = val.chars().take(width).collect();
+        }
+        buff.push_str(&val);
     }
 
     fn write_south(&self, buff: &mut String, open: bool, width: usize) {

@@ -2,6 +2,7 @@
 use crate::Grid;
 use crate::GridDirection;
 use crate::ImageGridRenderer;
+use crate::TextGridRenderer;
 use molt::check_args;
 use molt::molt_err;
 use molt::molt_ok;
@@ -366,9 +367,76 @@ fn obj_grid_rows(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
 // Renders the grid as a text string, which is returned.
 fn obj_grid_text(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
-    check_args(2, argv, 2, 2, "")?;
+    check_args(2, argv, 2, 0, "?options...?")?;
     let grid = interp.context::<Grid>(ctx);
-    molt_ok!(grid.to_string())
+
+    let mut renderer = TextGridRenderer::new();
+
+    let opt_args = &argv[2..argv.len()];
+    let mut queue = opt_args.iter();
+
+    enum Data {
+        None,
+        List(Value),
+        Dict(Value),
+    };
+
+    let mut data = Data::None;
+
+    while let Some(opt) = queue.next() {
+        let val = if let Some(opt_val) = queue.next() {
+            opt_val
+        } else {
+            return molt_err!("missing option value");
+        };
+
+        match opt.as_str() {
+            "-cellwidth" => {
+                let size = val.as_int()?;
+                if size < 1 {
+                    return molt_err!("invalid -cellwidth, expected positive integer");
+                }
+                renderer.cell_width(size as usize);
+            }
+            "-autowidth" => {
+                let margin = val.as_int()?;
+                if margin < 0 {
+                    return molt_err!("invalid -autowidth, expected non-negative integer");
+                }
+                renderer.auto_width(margin as usize);
+            }
+            "-datalist" => {
+                let list = val.as_list()?;
+                if list.len() != grid.num_cells() {
+                    return molt_err!("invalid -datalist, expected {} items", grid.num_cells());
+                }
+                data = Data::List(val.clone());
+            }
+            "-datadict" => {
+                let _ = val.as_dict()?;  // Just verify that it's a valid dict.
+                data = Data::Dict(val.clone());
+            }
+            _ => {
+                return molt_err!("invalid option: \"{}\"", opt);
+            }
+        }
+    }
+
+    match data {
+        Data::None => {
+            molt_ok!(renderer.render(&grid))
+        }
+        Data::List(val) => {
+            let list = val.as_list()?;  // Already has list type.
+            molt_ok!(renderer.render_with(&grid,
+                |c| Some(list[c].as_str())))
+        }
+        Data::Dict(val) => {
+            let dict = val.as_dict()?;  // Already has dict type.
+            molt_ok!(renderer.render_with(&grid,
+                |c| dict.get(&Value::from(c as MoltInt)).map(|v| v.as_str())))
+        }
+    }
 }
 
 // Unlinks the two cells, which must be neighbors.
