@@ -40,7 +40,7 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
 
     // FIRST, produce a maze.
     let mut grid = Grid::new(10, 20);
-    mazegen::hunt_and_kill(&mut grid);
+    mazegen::recursive_backtracker(&mut grid);
 
     // NEXT, compute the longest path in the maze.
     let cellpath = grid.longest_path();
@@ -102,11 +102,31 @@ fn cmd_maze(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     interp.call_subcommand(ctx, argv, 1, &MAZE_SUBCOMMANDS)
 }
 
-const MAZE_SUBCOMMANDS: [Subcommand; 3] = [
+const MAZE_SUBCOMMANDS: [Subcommand; 4] = [
+    Subcommand("backtracker", cmd_maze_backtracker),
     Subcommand("bintree", cmd_maze_bintree),
     Subcommand("huntandkill", cmd_maze_huntandkill),
     Subcommand("sidewinder", cmd_maze_sidewinder),
 ];
+
+fn cmd_maze_backtracker(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 5, 5, "name rows cols")?;
+
+    let name = argv[2].as_str();
+    let rows = argv[3].as_int()?;
+    let cols = argv[4].as_int()?;
+
+    if rows < 2 || cols < 2 {
+        return molt_err!("expected a max of size at least 2x2, got {}x{}", rows, cols);
+    }
+
+    let mut grid = Grid::new(rows as usize, cols as usize);
+    mazegen::recursive_backtracker(&mut grid);
+    make_grid_object(interp, name, grid);
+
+    molt_ok!(name)
+}
 
 fn cmd_maze_bintree(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
@@ -127,25 +147,6 @@ fn cmd_maze_bintree(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltRe
     molt_ok!(name)
 }
 
-fn cmd_maze_sidewinder(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
-    // Correct number of arguments?
-    check_args(2, argv, 5, 5, "name rows cols")?;
-
-    let name = argv[2].as_str();
-    let rows = argv[3].as_int()?;
-    let cols = argv[4].as_int()?;
-
-    if rows < 2 || cols < 2 {
-        return molt_err!("expected a max of size at least 2x2, got {}x{}", rows, cols);
-    }
-
-    let mut grid = Grid::new(rows as usize, cols as usize);
-    mazegen::sidewinder_maze(&mut grid);
-    make_grid_object(interp, name, grid);
-
-    molt_ok!(name)
-}
-
 fn cmd_maze_huntandkill(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
     check_args(2, argv, 5, 5, "name rows cols")?;
@@ -160,6 +161,25 @@ fn cmd_maze_huntandkill(interp: &mut Interp, _: ContextID, argv: &[Value]) -> Mo
 
     let mut grid = Grid::new(rows as usize, cols as usize);
     mazegen::hunt_and_kill(&mut grid);
+    make_grid_object(interp, name, grid);
+
+    molt_ok!(name)
+}
+
+fn cmd_maze_sidewinder(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 5, 5, "name rows cols")?;
+
+    let name = argv[2].as_str();
+    let rows = argv[3].as_int()?;
+    let cols = argv[4].as_int()?;
+
+    if rows < 2 || cols < 2 {
+        return molt_err!("expected a max of size at least 2x2, got {}x{}", rows, cols);
+    }
+
+    let mut grid = Grid::new(rows as usize, cols as usize);
+    mazegen::sidewinder_maze(&mut grid);
     make_grid_object(interp, name, grid);
 
     molt_ok!(name)

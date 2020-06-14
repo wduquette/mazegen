@@ -112,6 +112,39 @@ pub fn hunt_and_kill(grid: &mut Grid) {
     }
 }
 
+/// Recursive Backtracker maze algorithm
+pub fn recursive_backtracker(grid: &mut Grid) {
+    grid.clear();
+
+    // FIRST, pick a random starting point.
+    let mut current: Cell = thread_rng().gen_range(0, grid.num_cells());
+
+    // NEXT, create the stack to control execution.
+    let mut stack: Vec<Cell> = Vec::new();
+
+    stack.push(current);
+
+    // NEXT, carve into neighbors, backtracking until there are none.
+    while !stack.is_empty() {
+        current = stack.last().copied().expect("non-empty stack");
+
+        let neighbors: Vec<Cell> = grid
+            .neighbors(current)
+            .iter()
+            .copied()
+            .filter(|n| grid.links(*n).is_empty())
+            .collect();
+
+        if neighbors.is_empty() {
+            stack.pop();
+        } else {
+            let neighbor = sample(&neighbors);
+            grid.link(current, neighbor);
+            stack.push(neighbor);
+        }
+    }
+}
+
 /// Picks a random cell from a slice of cells.
 pub fn sample(vec: &[Cell]) -> Cell {
     assert!(!vec.is_empty());

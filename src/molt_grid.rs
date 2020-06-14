@@ -133,7 +133,9 @@ fn obj_grid_deadends(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> Mol
     check_args(2, argv, 2, 2, "")?;
     let grid = interp.context::<Grid>(ctx);
 
-    let list: MoltList = grid.dead_ends().iter()
+    let list: MoltList = grid
+        .dead_ends()
+        .iter()
         .map(|c| Value::from(*c as MoltInt))
         .collect();
 
@@ -413,7 +415,7 @@ fn obj_grid_text(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
                 data = Data::List(val.clone());
             }
             "-datadict" => {
-                let _ = val.as_dict()?;  // Just verify that it's a valid dict.
+                let _ = val.as_dict()?; // Just verify that it's a valid dict.
                 data = Data::Dict(val.clone());
             }
             _ => {
@@ -423,18 +425,16 @@ fn obj_grid_text(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
     }
 
     match data {
-        Data::None => {
-            molt_ok!(renderer.render(&grid))
-        }
+        Data::None => molt_ok!(renderer.render(&grid)),
         Data::List(val) => {
-            let list = val.as_list()?;  // Already has list type.
-            molt_ok!(renderer.render_with(&grid,
-                |c| Some(list[c].as_str())))
+            let list = val.as_list()?; // Already has list type.
+            molt_ok!(renderer.render_with(&grid, |c| Some(list[c].as_str())))
         }
         Data::Dict(val) => {
-            let dict = val.as_dict()?;  // Already has dict type.
-            molt_ok!(renderer.render_with(&grid,
-                |c| dict.get(&Value::from(c as MoltInt)).map(|v| v.as_str())))
+            let dict = val.as_dict()?; // Already has dict type.
+            molt_ok!(renderer.render_with(&grid, |c| dict
+                .get(&Value::from(c as MoltInt))
+                .map(|v| v.as_str())))
         }
     }
 }

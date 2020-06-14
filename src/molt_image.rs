@@ -24,11 +24,7 @@ pub fn cmd_image(interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResul
     let height = argv[3].as_int()?;
 
     if width < 1 || height < 1 {
-        return molt_err!(
-            "expected an of size at least 1x1, got {}x{}",
-            width,
-            height
-        );
+        return molt_err!("expected an of size at least 1x1, got {}x{}", width, height);
     }
 
     let image: RgbaImage = ImageBuffer::new(width as u32, height as u32);
@@ -64,7 +60,7 @@ fn obj_image_clear(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltR
     let pixel: MoltPixel = if argv.len() == 3 {
         MoltPixel::from_molt(&argv[2])?
     } else {
-        MoltPixel::rgb(255,255,255) // White
+        MoltPixel::rgb(255, 255, 255) // White
     };
 
     for x in 0..image.width() {
@@ -96,7 +92,7 @@ fn obj_image_put(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
     let pixel: MoltPixel = if argv.len() == 3 {
         MoltPixel::from_molt(&argv[2])?
     } else {
-        MoltPixel::rgb(0,0,0) // White
+        MoltPixel::rgb(0, 0, 0) // White
     };
 
     image.put_pixel(x, y, pixel.ipixel());
