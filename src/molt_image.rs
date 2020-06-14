@@ -86,8 +86,18 @@ fn obj_image_put(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
     check_args(2, argv, 4, 5, "x y ?pixel?")?;
     let image = interp.context::<RgbaImage>(ctx);
 
-    let x = argv[2].as_int()? as u32;
-    let y = argv[3].as_int()? as u32;
+    let ix = argv[2].as_int()?;
+    let iy = argv[3].as_int()?;
+
+    if ix < 0 || ix >= image.width() as MoltInt {
+        return molt_err!("x coordinate is out of range: \"{}\"", ix);
+    }
+    if iy < 0 || iy >= image.height() as MoltInt {
+        return molt_err!("y coordinate is out of range: \"{}\"", iy);
+    }
+
+    let x = ix as u32;
+    let y = iy as u32;
 
     let pixel: MoltPixel = if argv.len() == 3 {
         MoltPixel::from_molt(&argv[2])?
