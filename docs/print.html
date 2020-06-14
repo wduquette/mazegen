@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> MazeGen</a></li><li class="chapter-item expanded "><a href="api/overview.html"><strong aria-hidden="true">2.</strong> API Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="api/grid.html"><strong aria-hidden="true">2.1.</strong> grid</a></li><li class="chapter-item expanded "><a href="api/image.html"><strong aria-hidden="true">2.2.</strong> image</a></li><li class="chapter-item expanded "><a href="api/pixel.html"><strong aria-hidden="true">2.3.</strong> pixel</a></li><li class="chapter-item expanded "><a href="api/rand.html"><strong aria-hidden="true">2.4.</strong> rand</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> MazeGen</a></li><li class="chapter-item expanded "><a href="api/overview.html"><strong aria-hidden="true">2.</strong> API Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="api/grid.html"><strong aria-hidden="true">2.1.</strong> grid</a></li><li class="chapter-item expanded "><a href="api/image.html"><strong aria-hidden="true">2.2.</strong> image</a></li><li class="chapter-item expanded "><a href="api/maze.html"><strong aria-hidden="true">2.3.</strong> maze</a></li><li class="chapter-item expanded "><a href="api/pixel.html"><strong aria-hidden="true">2.4.</strong> pixel</a></li><li class="chapter-item expanded "><a href="api/rand.html"><strong aria-hidden="true">2.5.</strong> rand</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -461,6 +461,24 @@ black, <code>#000000</code>.</p>
 <hr />
 <p><strong>Syntax: <em>image</em> width</strong></p>
 <p>Returns an image's width in pixels.</p>
+<h1><a class="header" href="#maze----maze-constructor" id="maze----maze-constructor">maze -- Maze Constructor</a></h1>
+<p>The <code>maze</code> command creates <a href="api/grid.html"><strong>grid</strong></a> objects containing mazes produced one of a
+number of algorithms.  This command is a stopgap; in the long run, there will be a distinct
+command for each useful kind of maze, with appropriate options.</p>
+<h2><a class="header" href="#maze" id="maze">maze</a></h2>
+<hr />
+<p><strong>Syntax: maze <em>algorithm</em> <em>name</em> <em>rows</em> <em>columns</em></strong></p>
+<p>Creates a grid object called <em>name</em> containing a maze produced by the given <em>algorithm</em>.  The
+new grid will have the given number of <em>rows</em> and <em>columns</em>.  The <strong>backtracker</strong> algorithm
+is the best of these for practical use, but could be elaborated for even better results.  (I've
+got some Java code somewhere that parameterizes it nicely.)</p>
+<p>The algorithms are as follows:</p>
+<table><thead><tr><th>Algorithm</th><th>Description</th></tr></thead><tbody>
+<tr><td><strong>backtracker</strong></td><td>A good basic maze with good river.</td></tr>
+<tr><td><strong>bintree</strong></td><td>A dirt simple, not very satisfactory maze.</td></tr>
+<tr><td><strong>huntandkill</strong></td><td>Similar to <strong>backtracker</strong>; better memory usage, but slower.</td></tr>
+<tr><td><strong>sidewinder</strong></td><td>Slightly better than <strong>bintree</strong></td></tr>
+</tbody></table>
 <h1><a class="header" href="#pixel----pixel-type" id="pixel----pixel-type">pixel -- Pixel Type</a></h1>
 <p><strong>Syntax: pixel <em>subcommand</em> ?<em>args</em>...?</strong></p>
 <p>The <strong>pixel</strong> command provides access to the <strong>image</strong> crate's <code>Rgba</code> pixel type: red/green/blue

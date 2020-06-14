@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>MazeGen - The MazeGen Book</title>
+        <title>maze - The MazeGen Book</title>
         
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
@@ -11,21 +11,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
-        <link rel="shortcut icon" href="favicon.png">
-        <link rel="stylesheet" href="css/variables.css">
-        <link rel="stylesheet" href="css/general.css">
-        <link rel="stylesheet" href="css/chrome.css">
-        <link rel="stylesheet" href="css/print.css" media="print">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
         <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
         <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="highlight.css">
-        <link rel="stylesheet" href="tomorrow-night.css">
-        <link rel="stylesheet" href="ayu-highlight.css">
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
         
@@ -35,7 +35,7 @@
     <body>
         <!-- Provide site root to javascript -->
         <script type="text/javascript">
-            var path_to_root = "";
+            var path_to_root = "../";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "light";
         </script>
 
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> MazeGen</a></li><li class="chapter-item expanded "><a href="api/overview.html"><strong aria-hidden="true">2.</strong> API Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="api/grid.html"><strong aria-hidden="true">2.1.</strong> grid</a></li><li class="chapter-item expanded "><a href="api/image.html"><strong aria-hidden="true">2.2.</strong> image</a></li><li class="chapter-item expanded "><a href="api/maze.html"><strong aria-hidden="true">2.3.</strong> maze</a></li><li class="chapter-item expanded "><a href="api/pixel.html"><strong aria-hidden="true">2.4.</strong> pixel</a></li><li class="chapter-item expanded "><a href="api/rand.html"><strong aria-hidden="true">2.5.</strong> rand</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../overview.html"><strong aria-hidden="true">1.</strong> MazeGen</a></li><li class="chapter-item expanded "><a href="../api/overview.html"><strong aria-hidden="true">2.</strong> API Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../api/grid.html"><strong aria-hidden="true">2.1.</strong> grid</a></li><li class="chapter-item expanded "><a href="../api/image.html"><strong aria-hidden="true">2.2.</strong> image</a></li><li class="chapter-item expanded "><a href="../api/maze.html" class="active"><strong aria-hidden="true">2.3.</strong> maze</a></li><li class="chapter-item expanded "><a href="../api/pixel.html"><strong aria-hidden="true">2.4.</strong> pixel</a></li><li class="chapter-item expanded "><a href="../api/rand.html"><strong aria-hidden="true">2.5.</strong> rand</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -116,7 +116,7 @@
                     <h1 class="menu-title">The MazeGen Book</h1>
 
                     <div class="right-buttons">
-                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
                         
@@ -151,32 +151,37 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#mazegen" id="mazegen">MazeGen</a></h1>
-<p>MazeGen is a tool for creating Mazes.  It provides both a Rust API (viewable via
-<code>cargo doc</code>) and a <a href="https://github.com/wduquette/molt">Molt API</a> (documented in this book).</p>
-<p>My goals for MazeGen are as follows:</p>
-<ul>
-<li>To provide a use case for Molt, and especially for Molt's Rust API, so that I can find
-rough spots and look for improvements.</li>
-<li>To build some useful bindings for other Rust crates, e.g., <strong>image</strong>.
-<ul>
-<li>Some of these may become crates in their own right.</li>
-</ul>
-</li>
-<li>To learn more about the Rust ecosystem and the crates that are available (Molt goes out of
-its way to avoid dependencies).</li>
-<li>To have fun writing Rust code and playing with mazes.</li>
-</ul>
-<p>Your mileage may vary.</p>
+                        <h1><a class="header" href="#maze----maze-constructor" id="maze----maze-constructor">maze -- Maze Constructor</a></h1>
+<p>The <code>maze</code> command creates <a href="grid.html"><strong>grid</strong></a> objects containing mazes produced one of a
+number of algorithms.  This command is a stopgap; in the long run, there will be a distinct
+command for each useful kind of maze, with appropriate options.</p>
+<h2><a class="header" href="#maze" id="maze">maze</a></h2>
+<hr />
+<p><strong>Syntax: maze <em>algorithm</em> <em>name</em> <em>rows</em> <em>columns</em></strong></p>
+<p>Creates a grid object called <em>name</em> containing a maze produced by the given <em>algorithm</em>.  The
+new grid will have the given number of <em>rows</em> and <em>columns</em>.  The <strong>backtracker</strong> algorithm
+is the best of these for practical use, but could be elaborated for even better results.  (I've
+got some Java code somewhere that parameterizes it nicely.)</p>
+<p>The algorithms are as follows:</p>
+<table><thead><tr><th>Algorithm</th><th>Description</th></tr></thead><tbody>
+<tr><td><strong>backtracker</strong></td><td>A good basic maze with good river.</td></tr>
+<tr><td><strong>bintree</strong></td><td>A dirt simple, not very satisfactory maze.</td></tr>
+<tr><td><strong>huntandkill</strong></td><td>Similar to <strong>backtracker</strong>; better memory usage, but slower.</td></tr>
+<tr><td><strong>sidewinder</strong></td><td>Slightly better than <strong>bintree</strong></td></tr>
+</tbody></table>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                         
+                            <a rel="prev" href="../api/image.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
 
                         
-                            <a rel="next" href="api/overview.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../api/pixel.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -188,9 +193,13 @@ its way to avoid dependencies).</li>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
+                    <a rel="prev" href="../api/image.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
 
                 
-                    <a rel="next" href="api/overview.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../api/pixel.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                 
@@ -213,14 +222,14 @@ its way to avoid dependencies).</li>
         
 
         
-        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
         
 
-        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
         
