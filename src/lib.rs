@@ -128,13 +128,15 @@ pub fn recursive_backtracker(grid: &mut Grid) {
     while !stack.is_empty() {
         current = stack.last().copied().expect("non-empty stack");
 
+        // Get all neighbors of the current cell that have no links.
         let neighbors: Vec<Cell> = grid
             .neighbors(current)
-            .iter()
-            .copied()
+            .into_iter()
             .filter(|n| grid.links(*n).is_empty())
             .collect();
 
+        // If there are none, we're done here.  Otherwise, carve a link to one of them, and
+        // continue from there.
         if neighbors.is_empty() {
             stack.pop();
         } else {
