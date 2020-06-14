@@ -43,8 +43,10 @@ fn obj_image(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult 
     interp.call_subcommand(ctx, argv, 1, &OBJ_IMAGE_SUBCOMMANDS)
 }
 
-const OBJ_IMAGE_SUBCOMMANDS: [Subcommand; 5] = [
+const OBJ_IMAGE_SUBCOMMANDS: [Subcommand; 7] = [
     Subcommand("clear", obj_image_clear),
+    Subcommand("dump", obj_image_dump),
+    Subcommand("get", obj_image_get),
     Subcommand("height", obj_image_height),
     Subcommand("put", obj_image_put),
     Subcommand("save", obj_image_save),
@@ -72,6 +74,21 @@ fn obj_image_clear(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltR
     molt_ok!()
 }
 
+// Dumps the pixels in the image to std out.
+fn obj_image_dump(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 2, 2, "dump")?;
+    let image = interp.context::<RgbaImage>(ctx);
+
+    for x in 0..image.width() {
+        for y in 0..image.height() {
+            println!("[{},{}]: {:?}", x, y, image.get_pixel(x,y));
+        }
+    }
+
+    molt_ok!()
+}
+
 // Gets the height of the image, in pixels.
 fn obj_image_height(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
     // Correct number of arguments?
@@ -86,21 +103,10 @@ fn obj_image_put(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
     check_args(2, argv, 4, 5, "x y ?pixel?")?;
     let image = interp.context::<RgbaImage>(ctx);
 
-    let ix = argv[2].as_int()?;
-    let iy = argv[3].as_int()?;
+    let (x, y) = get_image_coords(&image, &argv[2], &argv[3])?;
 
-    if ix < 0 || ix >= image.width() as MoltInt {
-        return molt_err!("x coordinate is out of range: \"{}\"", ix);
-    }
-    if iy < 0 || iy >= image.height() as MoltInt {
-        return molt_err!("y coordinate is out of range: \"{}\"", iy);
-    }
-
-    let x = ix as u32;
-    let y = iy as u32;
-
-    let pixel: MoltPixel = if argv.len() == 3 {
-        MoltPixel::from_molt(&argv[2])?
+    let pixel: MoltPixel = if argv.len() == 5 {
+        MoltPixel::from_molt(&argv[4])?
     } else {
         MoltPixel::rgb(0, 0, 0) // White
     };
@@ -108,6 +114,21 @@ fn obj_image_put(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
     image.put_pixel(x, y, pixel.ipixel());
 
     molt_ok!()
+}
+
+// Gets a pixel.
+fn obj_image_get(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltResult {
+    // Correct number of arguments?
+    check_args(2, argv, 4, 4, "x y")?;
+    let image = interp.context::<RgbaImage>(ctx);
+
+    let (x, y) = get_image_coords(&image, &argv[2], &argv[3])?;
+
+    let ipixel = image.get_pixel(x, y);
+
+    let pixel = MoltPixel::from_ipixel(*ipixel);
+
+    molt_ok!(Value::from_other(pixel))
 }
 
 // Saves the content of the image to disk.
@@ -130,6 +151,25 @@ fn obj_image_width(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltR
     check_args(2, argv, 2, 2, "")?;
     let image = interp.context::<RgbaImage>(ctx);
     molt_ok!(image.width() as MoltInt)
+}
+
+fn get_image_coords(
+    image: &RgbaImage,
+    argx: &Value,
+    argy: &Value,
+) -> Result<(u32, u32), Exception> {
+    let ix = argx.as_int()?;
+    let iy = argy.as_int()?;
+
+    if ix < 0 || ix >= image.width() as MoltInt {
+        return molt_err!("x coordinate is out of range: \"{}\"", ix);
+    }
+
+    if iy < 0 || iy >= image.height() as MoltInt {
+        return molt_err!("y coordinate is out of range: \"{}\"", iy);
+    }
+
+    Ok((ix as u32, iy as u32))
 }
 
 //----------------------------------------------------------------------------

@@ -18,6 +18,8 @@ The **image** command creates an image object, a Molt binding to a Rust `RgbaIma
 new image object is a Molt command called *name*; the command provides access to the newly created
 image, which will have the given width and height in pixels.  Returns the *name*.
 
+The image will initially be full of transparent pixels: `#000000.00`.
+
 ```tcl
 $ image myimage 32 32
 myimage
@@ -37,10 +39,12 @@ The *image* object command has the following subcommands.
 | Subcommand                          | Description |
 | ----------------------------------- | ----------- |
 | [*image* clear](#image-clear)       | Clears an image to a given color |
-| [*image* height](#image-height)      | An image's height in pixels |
-| [*image* put](#image-put)            | Sets a pixel in the image |
-| [*image* save](#image-save)          | Saves the image to disk |
-| [*image* width](#image-width)        | An image's width in pixels |
+| [*image* dump](#image-dump)         | Dumps the pixel content to stdout |
+| [*image* get](#image-get)           | Gets a pixel from the image |
+| [*image* height](#image-height)     | An image's height in pixels |
+| [*image* put](#image-put)           | Sets a pixel in the image |
+| [*image* save](#image-save)         | Saves the image to disk |
+| [*image* width](#image-width)       | An image's width in pixels |
 
 ### *image* clear
 ---
@@ -52,6 +56,33 @@ Clears the image's pixels by setting them to the given *fill* color, which must 
 ```tcl
 $image clear #000000    ;# Clear to black
 $image clear #000000.00 ;# Clear to transparent
+```
+
+### *image* dump
+---
+**Syntax: *image* dump**
+
+Dumps the image's pixels to standard output, one pixel per row.  Used for debugging.
+
+```tcl
+$ image fred 16 16
+fred
+$ image dump
+[0,0]: Rgba([0, 0, 0, 0])
+[0,1]: Rgba([0, 0, 0, 0])
+[0,2]: Rgba([0, 0, 0, 0])
+...
+```
+
+### *image* get
+---
+**Syntax: *image* get *x y***
+
+Gets the pixel at the given (*x*,*y*) coordinates.
+
+```tcl
+$ $image get 10 15
+#123456
 ```
 
 ### *image* height

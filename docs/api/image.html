@@ -164,6 +164,7 @@ details.</p>
 <p>The <strong>image</strong> command creates an image object, a Molt binding to a Rust <code>RgbaImage</code> struct.  The
 new image object is a Molt command called <em>name</em>; the command provides access to the newly created
 image, which will have the given width and height in pixels.  Returns the <em>name</em>.</p>
+<p>The image will initially be full of transparent pixels: <code>#000000.00</code>.</p>
 <pre><code class="language-tcl">$ image myimage 32 32
 myimage
 $ myimage width
@@ -177,6 +178,8 @@ $
 <p>The <em>image</em> object command has the following subcommands.</p>
 <table><thead><tr><th>Subcommand</th><th>Description</th></tr></thead><tbody>
 <tr><td><a href="#image-clear"><em>image</em> clear</a></td><td>Clears an image to a given color</td></tr>
+<tr><td><a href="#image-dump"><em>image</em> dump</a></td><td>Dumps the pixel content to stdout</td></tr>
+<tr><td><a href="#image-get"><em>image</em> get</a></td><td>Gets a pixel from the image</td></tr>
 <tr><td><a href="#image-height"><em>image</em> height</a></td><td>An image's height in pixels</td></tr>
 <tr><td><a href="#image-put"><em>image</em> put</a></td><td>Sets a pixel in the image</td></tr>
 <tr><td><a href="#image-save"><em>image</em> save</a></td><td>Saves the image to disk</td></tr>
@@ -189,6 +192,25 @@ $
 <a href="pixel.html"><strong>pixel</strong></a> value.  The <em>fill</em> defaults to white, <code>#FFFFFF</code>.</p>
 <pre><code class="language-tcl">$image clear #000000    ;# Clear to black
 $image clear #000000.00 ;# Clear to transparent
+</code></pre>
+<h3><a class="header" href="#image-dump" id="image-dump"><em>image</em> dump</a></h3>
+<hr />
+<p><strong>Syntax: <em>image</em> dump</strong></p>
+<p>Dumps the image's pixels to standard output, one pixel per row.  Used for debugging.</p>
+<pre><code class="language-tcl">$ image fred 16 16
+fred
+$ image dump
+[0,0]: Rgba([0, 0, 0, 0])
+[0,1]: Rgba([0, 0, 0, 0])
+[0,2]: Rgba([0, 0, 0, 0])
+...
+</code></pre>
+<h3><a class="header" href="#image-get" id="image-get"><em>image</em> get</a></h3>
+<hr />
+<p><strong>Syntax: <em>image</em> get <em>x y</em></strong></p>
+<p>Gets the pixel at the given (<em>x</em>,<em>y</em>) coordinates.</p>
+<pre><code class="language-tcl">$ $image get 10 15
+#123456
 </code></pre>
 <h3><a class="header" href="#image-height" id="image-height"><em>image</em> height</a></h3>
 <hr />

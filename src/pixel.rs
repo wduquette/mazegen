@@ -54,9 +54,17 @@ impl MoltPixel {
     }
 
     /// Get the underlying image::Rgba pixel
-    /// TODO: Should be "inner"?
+    /// TODO: Should be "inner"?  Or a normal conversion?
     pub fn ipixel(&self) -> Rgba<u8> {
         self.ipixel
+    }
+
+    /// Wrap an existing Rgba pixel.
+    /// TODO: Make this a normal conversion.
+    pub fn from_ipixel(ipixel: Rgba<u8>) -> Self {
+        Self {
+            ipixel
+        }
     }
 }
 
