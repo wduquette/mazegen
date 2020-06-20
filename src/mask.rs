@@ -1,6 +1,12 @@
-//! A mask, for defining irregular mazes.
+//! A bit mask, for defining irregular mazes.
+//!
+//! * Could use bit-vec crate as basis; would save memory.
+//! * Could define all the various flavors of iterators.
+//! * Could define a matrix trait, to be shared with Grid.
+
 
 use crate::Cell;
+use crate::IJ;
 use crate::sample;
 use std::ops::Index;
 use std::ops::IndexMut;
@@ -97,16 +103,21 @@ impl Mask {
         self.cells.iter().copied().filter(|flag| *flag).count()
     }
 
-    /// Returns a random cell, guaranteed to be alive.  Only returns None if there
-    /// are no live cells.
-    pub fn random_cell(&self) -> Option<Cell> {
-        let live_cells: Vec<Cell> = self.cells
+    /// Returns a list of the live cells in the mask.
+    pub fn live_cells(&self) -> Vec<Cell> {
+        self.cells
             .iter()
             .copied()
             .enumerate()
             .filter(|(_, flag)| *flag)
             .map(|(cell, _)| cell)
-            .collect();
+            .collect()
+    }
+
+    /// Returns a random cell, guaranteed to be alive.  Only returns None if there
+    /// are no live cells.
+    pub fn random_cell(&self) -> Option<Cell> {
+        let live_cells = self.live_cells();
 
         if live_cells.len() > 0 {
             Some(sample(&live_cells))
@@ -129,6 +140,23 @@ impl IndexMut<usize> for Mask {
         &mut self.cells[idx]
     }
 }
+
+impl Index<IJ> for Mask {
+    type Output = bool;
+
+    fn index(&self, idx: IJ) -> &Self::Output {
+        let cell = self.cell(idx.0, idx.1);
+        &self.cells[cell]
+    }
+}
+
+impl IndexMut<IJ> for Mask {
+    fn index_mut(&mut self, idx: IJ) -> &mut Self::Output {
+        let cell = self.cell(idx.0, idx.1);
+        &mut self.cells[cell]
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -207,7 +235,7 @@ mod tests {
     }
 
     #[test]
-    fn test_mask_index() {
+    fn test_mask_index_cell() {
         let mut mask = Mask::new(5, 6);
 
         for cell in 0..mask.num_cells() {
@@ -215,5 +243,28 @@ mod tests {
             mask[cell] = false;
             assert!(!mask[cell]);
         }
+    }
+
+    #[test]
+    fn test_mask_index_cell_ij() {
+        let mut mask = Mask::new(5, 6);
+
+        for i in 0..mask.num_rows() {
+            for j in 0..mask.num_cols() {
+                assert!(mask[(i,j)]);
+                mask[(i,j)] = false;
+                assert!(!mask[(i,j)]);
+            }
+        }
+    }
+
+    #[test]
+    fn test_live_cells() {
+        let mut mask = Mask::new(2, 2);
+
+        assert_eq!(mask.live_cells(), vec![0,1,2,3]);
+
+        mask[2] = false;
+        assert_eq!(mask.live_cells(), vec![0,1,3]);
     }
 }

@@ -25,6 +25,9 @@ mod text_grid_renderer;
 /// `Grid` provides a conversion between Cells and (i,j) row/column pairs.
 pub type Cell = usize;
 
+/// An IJ coordinate pair
+pub type IJ = (usize,usize);
+
 /// Algorithm to produce a Grid containing a binary-tree maze
 pub fn binary_tree_maze(grid: &mut Grid) {
     grid.clear();
