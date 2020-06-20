@@ -2,6 +2,8 @@
 
 use crate::Cell;
 use crate::sample;
+use std::ops::Index;
+use std::ops::IndexMut;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Mask {
@@ -84,11 +86,6 @@ impl Mask {
         self.cells[cell] = flag;
     }
 
-    /// Kills the given cell.
-    pub fn kill(&mut self, cell: Cell) {
-        self.set(cell, false);
-    }
-
     /// Returns true if the cell is alive, and false otherwise.
     pub fn is_alive(&mut self, cell: Cell) -> bool {
         assert!(self.contains(cell));
@@ -116,6 +113,20 @@ impl Mask {
         } else {
             None
         }
+    }
+}
+
+impl Index<usize> for Mask {
+    type Output = bool;
+
+    fn index(&self, idx: usize) -> &Self::Output {
+        &self.cells[idx]
+    }
+}
+
+impl IndexMut<usize> for Mask {
+    fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
+        &mut self.cells[idx]
     }
 }
 
@@ -172,6 +183,37 @@ mod tests {
                 assert_eq!(mask.i(cell), i);
                 assert_eq!(mask.j(cell), j);
             }
+        }
+    }
+
+    #[test]
+    fn test_mask_set_is_alive() {
+        let mut mask = Mask::new(5, 6);
+
+        for cell in 0..mask.num_cells() {
+            assert!(mask.is_alive(cell));
+            mask.set(cell, false);
+            assert!(!mask.is_alive(cell));
+        }
+    }
+
+    #[test]
+    fn test_mask_live_count() {
+        let mut mask = Mask::new(5, 6);
+        assert_eq!(mask.live_count(), 30);
+
+        mask.set(0, false);
+        assert_eq!(mask.live_count(), 29);
+    }
+
+    #[test]
+    fn test_mask_index() {
+        let mut mask = Mask::new(5, 6);
+
+        for cell in 0..mask.num_cells() {
+            assert!(mask[cell]);
+            mask[cell] = false;
+            assert!(!mask[cell]);
         }
     }
 }
