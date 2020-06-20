@@ -3,12 +3,14 @@
 pub use crate::grid::*;
 pub use crate::grid_dir::*;
 pub use crate::image_grid_renderer::*;
+pub use crate::mask::*;
 pub use crate::pixel::*;
 pub use crate::text_grid_renderer::*;
 use rand::{thread_rng, Rng};
 
 mod grid;
 mod grid_dir;
+mod mask;
 mod image_grid_renderer;
 pub mod molt_grid;
 pub mod molt_image;
