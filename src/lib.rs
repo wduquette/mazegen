@@ -155,7 +155,7 @@ pub fn recursive_backtracker(grid: &mut Grid) {
 }
 
 /// Picks a random cell from a slice of cells.
-pub fn sample(vec: &[Cell]) -> Cell {
+pub fn sample<T: Copy>(vec: &[T]) -> T {
     assert!(!vec.is_empty());
 
     if vec.len() == 1 {
