@@ -57,7 +57,7 @@ impl Mask {
     }
 
     /// Computes the cell from the row and column.
-    pub fn cell(&self, i: usize, j: usize) -> Cell {
+    pub fn cell(&self, (i,j): IJ) -> Cell {
         assert!(i < self.num_rows && j < self.num_cols);
         i * self.num_cols + j
     }
@@ -75,7 +75,7 @@ impl Mask {
     }
 
     /// Computes the row and column indices from the cell ID.
-    pub fn ij(&self, cell: Cell) -> (usize, usize) {
+    pub fn ij(&self, cell: Cell) -> IJ {
         assert!(self.contains(cell));
         (cell / self.num_cols, cell % self.num_cols)
     }
@@ -145,14 +145,14 @@ impl Index<IJ> for Mask {
     type Output = bool;
 
     fn index(&self, idx: IJ) -> &Self::Output {
-        let cell = self.cell(idx.0, idx.1);
+        let cell = self.cell(idx);
         &self.cells[cell]
     }
 }
 
 impl IndexMut<IJ> for Mask {
     fn index_mut(&mut self, idx: IJ) -> &mut Self::Output {
-        let cell = self.cell(idx.0, idx.1);
+        let cell = self.cell(idx);
         &mut self.cells[cell]
     }
 }
@@ -175,12 +175,12 @@ mod tests {
     fn test_mask_cell() {
         let mask = Mask::new(5, 6);
 
-        assert_eq!(mask.cell(0, 0), 0);
-        assert_eq!(mask.cell(0, 3), 3);
-        assert_eq!(mask.cell(1, 0), 6);
-        assert_eq!(mask.cell(1, 3), 9);
-        assert_eq!(mask.cell(2, 0), 12);
-        assert_eq!(mask.cell(4, 5), mask.num_cells() - 1);
+        assert_eq!(mask.cell((0, 0)), 0);
+        assert_eq!(mask.cell((0, 3)), 3);
+        assert_eq!(mask.cell((1, 0)), 6);
+        assert_eq!(mask.cell((1, 3)), 9);
+        assert_eq!(mask.cell((2, 0)), 12);
+        assert_eq!(mask.cell((4, 5)), mask.num_cells() - 1);
     }
 
     #[test]
@@ -206,7 +206,7 @@ mod tests {
 
         for i in 0..mask.num_rows() {
             for j in 0..mask.num_cols() {
-                let cell = mask.cell(i, j);
+                let cell = mask.cell((i, j));
                 assert!(mask.contains(cell));
                 assert_eq!(mask.i(cell), i);
                 assert_eq!(mask.j(cell), j);
