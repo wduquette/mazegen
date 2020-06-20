@@ -1,12 +1,14 @@
 //! A library for generating and rendering and working with mazes.  The code is inspired
 //! by _Mazes for Programmers_ by Jamis Buck, but isn't a straightforward translation.
 pub use crate::grid::*;
+pub use crate::grid_dir::*;
 pub use crate::image_grid_renderer::*;
 pub use crate::pixel::*;
 pub use crate::text_grid_renderer::*;
 use rand::{thread_rng, Rng};
 
 mod grid;
+mod grid_dir;
 mod image_grid_renderer;
 pub mod molt_grid;
 pub mod molt_image;

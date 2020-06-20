@@ -1,13 +1,12 @@
 //! This module defines Grid, a rectilinear Grid for building mazes with.
 
 use crate::Cell;
+use crate::GridDirection;
 use crate::ImageGridRenderer;
 use crate::TextGridRenderer;
 use image::RgbaImage;
 use std::collections::HashSet;
-use std::fmt;
 use std::fmt::Display;
-use std::str::FromStr;
 
 /// A rectangular grid of cells, which can be used to represent a maze.
 /// Each cell has its neighbors to the north, south, east, and west (as constrained by
@@ -389,40 +388,6 @@ impl Display for Grid {
     }
 }
 
-/// The directions between cells in this grid.
-/// TODO: Should be an associated type?
-#[derive(Debug, PartialEq, Copy, Clone)]
-pub enum GridDirection {
-    North,
-    South,
-    East,
-    West,
-}
-
-impl fmt::Display for GridDirection {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            GridDirection::North => write!(f, "north"),
-            GridDirection::South => write!(f, "south"),
-            GridDirection::East => write!(f, "east"),
-            GridDirection::West => write!(f, "west"),
-        }
-    }
-}
-
-impl FromStr for GridDirection {
-    type Err = String;
-
-    fn from_str(dir: &str) -> Result<Self, Self::Err> {
-        match dir {
-            "north" => Ok(GridDirection::North),
-            "south" => Ok(GridDirection::South),
-            "east" => Ok(GridDirection::East),
-            "west" => Ok(GridDirection::West),
-            _ => Err(format!("expected direction, got \"{}\"", dir)),
-        }
-    }
-}
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 struct CellData {
