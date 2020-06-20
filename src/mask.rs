@@ -6,7 +6,6 @@
 
 
 use crate::Cell;
-use crate::IJ;
 use crate::sample;
 use std::ops::Index;
 use std::ops::IndexMut;
@@ -57,32 +56,32 @@ impl Mask {
     }
 
     /// Computes the cell from the row and column.
-    fn cell(&self, (i,j): IJ) -> Cell {
+    fn cell(&self, (i,j): (usize,usize)) -> Cell {
         assert!(i < self.num_rows && j < self.num_cols);
         i * self.num_cols + j
     }
 
     /// Computes the row and column indices from the cell ID.
-    fn ij(&self, cell: Cell) -> IJ {
+    fn ij(&self, cell: Cell) -> (usize,usize) {
         assert!(cell < self.num_cells);
         (cell / self.num_cols, cell % self.num_cols)
     }
 
     /// Does the mask contain the location?
-    pub fn contains(&self, (i,j): IJ) -> bool {
+    pub fn contains(&self, (i,j): (usize,usize)) -> bool {
         // NOTE: No need to check against zero, since we're using an unsigned type.
         i < self.num_rows && j < self.num_cols
     }
 
     /// Sets the cell's alive/dead flag.
-    pub fn set(&mut self, ij: IJ, flag: bool) {
+    pub fn set(&mut self, ij: (usize,usize), flag: bool) {
         assert!(self.contains(ij));
         let cell = self.cell(ij);
         self.cells[cell] = flag;
     }
 
     /// Returns true if the cell is alive, and false otherwise.
-    pub fn is_alive(&mut self, ij: IJ) -> bool {
+    pub fn is_alive(&mut self, ij: (usize,usize)) -> bool {
         assert!(self.contains(ij));
         let cell = self.cell(ij);
         self.cells[cell]
@@ -94,7 +93,7 @@ impl Mask {
     }
 
     /// Returns a list of the live cells in the mask.
-    pub fn live_cells(&self) -> Vec<IJ> {
+    pub fn live_cells(&self) -> Vec<(usize,usize)> {
         self.cells
             .iter()
             .copied()
@@ -106,7 +105,7 @@ impl Mask {
 
     /// Returns a random cell, guaranteed to be alive.  Only returns None if there
     /// are no live cells.
-    pub fn random_cell(&self) -> Option<IJ> {
+    pub fn random_cell(&self) -> Option<(usize,usize)> {
         let live_cells = self.live_cells();
 
         if live_cells.len() > 0 {
@@ -117,17 +116,17 @@ impl Mask {
     }
 }
 
-impl Index<IJ> for Mask {
+impl Index<(usize,usize)> for Mask {
     type Output = bool;
 
-    fn index(&self, idx: IJ) -> &Self::Output {
+    fn index(&self, idx: (usize,usize)) -> &Self::Output {
         let cell = self.cell(idx);
         &self.cells[cell]
     }
 }
 
-impl IndexMut<IJ> for Mask {
-    fn index_mut(&mut self, idx: IJ) -> &mut Self::Output {
+impl IndexMut<(usize,usize)> for Mask {
+    fn index_mut(&mut self, idx: (usize,usize)) -> &mut Self::Output {
         let cell = self.cell(idx);
         &mut self.cells[cell]
     }
