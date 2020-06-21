@@ -185,10 +185,10 @@ involves &quot;carving out&quot; links within a grid.</p>
 <p>In TCL, a grid is represented as a Molt object: a molt command whose subcommands correspond more
 or less to the methods of the <code>Grid</code> struct.  The <a href="api/grid.html#constructor"><strong>grid</strong> constructor</a> creates
 instances of the grid <a href="api/grid.html#object-command">object command</a>.</p>
-<h2><a class="header" href="#cell-ids-and-coordinates" id="cell-ids-and-coordinates">Cell IDs and Coordinates</a></h2>
-<p>Each cell in the grid has a unique cell ID, an integer from 0 to N-1, where N is the number of
-cells in the grid.  A cell can also be referenced by its (<em>i,j</em>) row/column coordinates.  Cell
-(0,0) is at the top-left; Rows <em>i</em> extend down, and the columns <em>j</em> extend to the right.</p>
+<h2><a class="header" href="#cell-coordinates" id="cell-coordinates">Cell Coordinates</a></h2>
+<p>Cells in the grid are identified by their matrix-style coordinates, (<em>i,j</em>), where <em>i</em> ranges from
+0 to (num_rows - 1) and <em>j</em> ranges from 0 to (num_cols - 1). Cell (0,0) is at the top-left;
+rows <em>i</em> extend down, and the columns <em>j</em> extend to the right.</p>
 <h2><a class="header" href="#cell-directions" id="cell-directions">Cell Directions</a></h2>
 <p>A cell can have up to four neighbors, which are to the <strong>north</strong>, <strong>south</strong>, <strong>east</strong>, or
 <strong>west</strong>.</p>
@@ -209,40 +209,32 @@ $
 <p><strong>Syntax: <em>grid subcommand</em> ?<em>args</em>...?</strong></p>
 <p>The <em>grid</em> object command has the following subcommands.</p>
 <table><thead><tr><th>Subcommand</th><th>Description</th></tr></thead><tbody>
-<tr><td><a href="api/grid.html#grid-cell"><em>grid</em> cell</a></td><td>Converts an <em>i j</em> pair to a cell ID</td></tr>
 <tr><td><a href="api/grid.html#grid-cells"><em>grid</em> cells</a></td><td>The number of cells in the grid</td></tr>
-<tr><td><a href="api/grid.html#grid-cellto"><em>grid</em> cellto</a></td><td>The ID of the cell in a given direction</td></tr>
+<tr><td><a href="api/grid.html#grid-cellto"><em>grid</em> cellto</a></td><td>The coordinates of the cell in a given direction</td></tr>
 <tr><td><a href="api/grid.html#grid-clear"><em>grid</em> clear</a></td><td>Clears the grid, i.e., unlinks all linked cells</td></tr>
 <tr><td><a href="api/grid.html#grid-cols"><em>grid</em> cols</a></td><td>The number of columns in the grid</td></tr>
-<tr><td><a href="api/grid.html#grid-deadends"><em>grid</em> deadends</a></td><td>Cell IDs of dead-end cells</td></tr>
+<tr><td><a href="api/grid.html#grid-deadends"><em>grid</em> deadends</a></td><td>Dead-end cells</td></tr>
 <tr><td><a href="api/grid.html#grid-distances"><em>grid</em> distances</a></td><td>Distances of all cells from a given cell</td></tr>
-<tr><td><a href="api/grid.html#grid-i"><em>grid</em> i</a></td><td>Converts a cell ID to an <em>i</em> coordinate</td></tr>
-<tr><td><a href="api/grid.html#grid-ij"><em>grid</em> ij</a></td><td>Converts a cell ID to an <em>i j</em> pair</td></tr>
-<tr><td><a href="api/grid.html#grid-j"><em>grid</em> j</a></td><td>Converts a cell ID to a <em>j</em> coordinate</td></tr>
 <tr><td><a href="api/grid.html#grid-linked"><em>grid</em> linked</a></td><td>Are two cells linked?</td></tr>
 <tr><td><a href="api/grid.html#grid-linkedto"><em>grid</em> linkedto</a></td><td>Is a cell linked to the cell in a given direction?</td></tr>
 <tr><td><a href="api/grid.html#grid-link"><em>grid</em> link</a></td><td>Links two adjacent cells</td></tr>
 <tr><td><a href="api/grid.html#grid-links"><em>grid</em> links</a></td><td>The cells to which a cell is linked</td></tr>
 <tr><td><a href="api/grid.html#grid-longest"><em>grid</em> longest</a></td><td>The longest path in the grid</td></tr>
 <tr><td><a href="api/grid.html#grid-neighbors"><em>grid</em> neighbors</a></td><td>The cells adjacent to a given cell</td></tr>
+<tr><td><a href="api/grid.html#grid-path"><em>grid</em> path</a></td><td>Find a path between two cells</td></tr>
 <tr><td><a href="api/grid.html#grid-render"><em>grid</em> render</a></td><td>Render an image that depicts the grid</td></tr>
 <tr><td><a href="api/grid.html#grid-rows"><em>grid</em> rows</a></td><td>The number of rows in the grid</td></tr>
 <tr><td><a href="api/grid.html#grid-text"><em>grid</em> text</a></td><td>Render a string that depicts the grid</td></tr>
 <tr><td><a href="api/grid.html#grid-unlink"><em>grid</em> unlink</a></td><td>Unlink two adjacent cells</td></tr>
 </tbody></table>
-<h3><a class="header" href="#grid-cell" id="grid-cell"><em>grid</em> cell</a></h3>
-<hr />
-<p><strong>Syntax: <em>grid</em> cell <em>i j</em></strong></p>
-<p>Returns the cell ID corresponding to row <em>i</em>, column <em>j</em>.  Rows are indexed from 0 to M-1,
-and columns are indexed from 0 to N-1.</p>
 <h3><a class="header" href="#grid-cells" id="grid-cells"><em>grid</em> cells</a></h3>
 <hr />
 <p><strong>Syntax: <em>grid</em> cells</strong></p>
 <p>Returns the number of cells in the grid.</p>
 <h3><a class="header" href="#grid-cellto" id="grid-cellto"><em>grid</em> cellto</a></h3>
 <hr />
-<p><strong>Syntax: <em>grid</em> cellto <em>cell</em> north|south|east|west</strong></p>
-<p>Returns the ID of the cell to the <strong>north</strong>, <strong>south</strong>, <strong>east</strong> or <strong>west</strong> of the given <em>cell</em>,
+<p><strong>Syntax: <em>grid</em> cellto <em>i j</em> north|south|east|west</strong></p>
+<p>Returns the ID of the cell to the <strong>north</strong>, <strong>south</strong>, <strong>east</strong> or <strong>west</strong> of cell <em>i,j</em>
 or the empty string if there is no such cell.</p>
 <h3><a class="header" href="#grid-clear" id="grid-clear"><em>grid</em> clear</a></h3>
 <hr />
@@ -254,68 +246,100 @@ or the empty string if there is no such cell.</p>
 <p>Returns the number of columns in the grid.</p>
 <h3><a class="header" href="#grid-deadends" id="grid-deadends"><em>grid</em> deadends</a></h3>
 <hr />
-<p><strong>Syntax: <em>grid</em> deadends</strong></p>
-<p>Returns a list of the IDs of all dead-end cells in the grid.  A cell is a dead-end if it
-is linked to only one other cell.</p>
+<p><strong>Syntax: <em>grid</em> deadends ?-flat|-pairs?</strong></p>
+<p>Returns a list of the coordinates of all dead-end cells in the grid.  A cell is a dead-end
+if it is linked to only one other cell.  By default, or if <strong>-flat</strong> is given, the list is a
+flat list &quot;<em>i1 j1 i2 j2...</em>&quot;.  If <strong>-pairs</strong> is given, the list is a list of pairs,
+&quot;{<em>i1 j1</em>} {<em>i2 j2</em>}...&quot;.</p>
+<pre><code class="language-tcl"># Cells (0,0) and (15,9) are dead ends.
+puts [$grid deadends]   ;# outputs &quot;0 0 15 9&quot;
+
+# Prints all dead ends, one per line
+foreach {i j} [$grid deadends] {
+    puts &quot;Dead End: $i,$j&quot;
+}
+</code></pre>
 <h3><a class="header" href="#grid-distances" id="grid-distances"><em>grid</em> distances</a></h3>
 <hr />
-<p><strong>Syntax: <em>grid</em> distances <em>cell</em> -list|-dict</strong></p>
-<p>Computes the minimum distance from the given <em>cell</em> to every other cell.  By default, or if the
-<code>-list</code> option is given, returns a list of distances by cell ID.  If the <code>-dict</code> option is given,
-returns a Molt dictionary of distances by cell ID.</p>
-<pre><code class="language-tcl">$ set list [$grid distances 0]                   ;# Distances from cell 0 as a list
-$ set to35 [lindex $list 35]                     ;# Distance from 0 to cell 35
-$ array set distances [grid distances 0 -dict]   ;# Distances from cell 0 as a dict
-$ set to35 $distances(35)                        ;# Distance from 0 to cell 35
+<p><strong>Syntax: <em>grid</em> distances <em>i j</em> -flat|-pairs</strong></p>
+<p>Computes the minimum distance from cell <em>i,j</em> to every other cell.  By default, or if the
+<strong>-flat</strong> option is given, returns a flat list of cell coordinates and distances,
+&quot;<em>i1 j1 dist1 i2 j2 dist2</em>...&quot;.  If the <strong>-pairs</strong> option is given, returns a list
+&quot;{<em>i1 j1</em>} <em>dist1</em> {<em>i2 j2</em>} <em>dist2</em>...&quot;.  Note that in the latter case, the result is
+a Molt dictionary of distances by coordinate pair.</p>
+<pre><code class="language-tcl"># Distances from cell 0,0 as a list
+set list [$grid distances 0 0]
+
+foreach {i j distance} $list {
+    puts &quot;Distance to $i,$j = $distance&quot;
+}
+
+# Distances from cell 0,0 as a dictionary
+
+array set distances [grid distances 0 0 -pairs]
+set distanceTo35 $distances({3 5})
 </code></pre>
-<h3><a class="header" href="#grid-i" id="grid-i"><em>grid</em> i</a></h3>
-<hr />
-<p><strong>Syntax: <em>grid</em> i <em>cell</em></strong></p>
-<p>Gets the row index of the <em>cell</em> with the given ID.</p>
-<h3><a class="header" href="#grid-ij" id="grid-ij"><em>grid</em> ij</a></h3>
-<hr />
-<p><strong>Syntax: <em>grid</em> ij <em>cell</em></strong></p>
-<p>Gets the row/column coordinates of the <em>cell</em> with the given ID as a two-element list.</p>
-<pre><code class="language-tcl">$ set pair [$grid ij 35]      ;# Get the I/J coordinates of cell 35
-$ set i [lindex $pair 0]
-$ set j [lindex $pair 1]
-$ lassign [$grid ij 35] i j   ;# Once Molt implements lassign
-</code></pre>
-<h3><a class="header" href="#grid-j" id="grid-j"><em>grid</em> j</a></h3>
-<hr />
-<p><strong>Syntax: <em>grid</em> j <em>cell</em></strong></p>
-<p>Gets the column index of the <em>cell</em> with the given ID.</p>
 <h3><a class="header" href="#grid-link" id="grid-link"><em>grid</em> link</a></h3>
 <hr />
-<p><strong>Syntax: <em>grid</em> link <em>cell1 cell2</em></strong></p>
-<p>Links the cell <em>cell1</em> to <em>cell2</em> given their IDs.  The two cells must be adjacent.  Note:
+<p><strong>Syntax: <em>grid</em> link <em>i1 j1 i2 j2</em></strong></p>
+<p>Links the cell <em>i1,j1</em> to <em>i2,j2</em> given their IDs.  The two cells must be neighbors.  Note:
 links are always bidirectional.</p>
-<pre><code class="language-tcl">$ $grid link $cell1 $cell2
-$ $grid linked $cell1 $cell2
+<pre><code class="language-tcl">$ $grid link 5 6 5 7
+$ $grid linked 5 6 5 7
 1
-$ $grid linked $cell2 $cell1
+$ $grid linked 5 7 5 6
 1
 </code></pre>
 <h3><a class="header" href="#grid-linked" id="grid-linked"><em>grid</em> linked</a></h3>
 <hr />
-<p><strong>Syntax: <em>grid</em> linked <em>cell1 cell2</em></strong></p>
-<p>Returns true if cell <em>cell1</em> is linked to <em>cell2</em>, given their IDs, and false otherwise.</p>
+<p><strong>Syntax: <em>grid</em> linked <em>i1 j1 i2 j2</em></strong></p>
+<p>Returns true if cell <em>i1,j1</em> is linked to <em>i2,j2</em>, and false otherwise.</p>
 <h3><a class="header" href="#grid-linkedto" id="grid-linkedto"><em>grid</em> linkedto</a></h3>
 <hr />
-<p><strong>Syntax: <em>grid</em> linkedto <em>cell</em> north|south|east|west</strong></p>
-<p>Returns true if the given <em>cell</em> is linked to its neighbor in the given direction.</p>
+<p><strong>Syntax: <em>grid</em> linkedto <em>i j</em> north|south|east|west</strong></p>
+<p>Returns true if the cell <em>i,j</em> is linked to its neighbor in the given direction.</p>
 <h3><a class="header" href="#grid-links" id="grid-links"><em>grid</em> links</a></h3>
 <hr />
-<p><strong>Syntax: <em>grid</em> links <em>cell</em></strong></p>
-<p>Returns a list of the IDs of the cells that are linked to the given <em>cell</em>.</p>
+<p><strong>Syntax: <em>grid</em> links <em>i j</em> ?-flat|-pairs?</strong></p>
+<p>By default, or if the <strong>-flat</strong> option is given, returns a flat list of the coordinates of the
+cells that are linked to <em>i j</em>.  If <strong>-pairs</strong> is given, returns a list of pairs.</p>
+<p>For example, suppose that 0,0 is linked east to 0,1 and south to 1,0:</p>
+<pre><code>$ $grid links 0 0
+0 1 1 0
+$ $grid links 0 0 -flat
+0 1 1 0
+$ $grid links 0 0 -pairs
+{0 1} {1 0}
+</code></pre>
 <h3><a class="header" href="#grid-longest" id="grid-longest"><em>grid</em> longest</a></h3>
 <hr />
-<p><strong>Syntax: <em>grid</em> longest</strong></p>
-<p>Returns the longest path through the grid as a list of cell IDs.</p>
+<p><strong>Syntax: <em>grid</em> longest ?-flat|-pairs?</strong></p>
+<p>Returns the longest path through the grid.  By default, or if <strong>-flat</strong> is given, returns a flat
+list of the coordinates of the cells; if <strong>-pairs</strong>, returns a list of pairs.</p>
+<p>Supposing the longest path starts at 0,0,</p>
+<pre><code>$ $grid longest
+0 0 0 1 1 1 ...
+$ $grid longest -pairs
+{0 0} {0 1} {1 1} ...
+</code></pre>
 <h3><a class="header" href="#grid-neighbors" id="grid-neighbors"><em>grid</em> neighbors</a></h3>
 <hr />
-<p><strong>Syntax: <em>grid</em> neighbors <em>cell</em></strong></p>
-<p>Returns a list of the IDs of the cells that are neighbors of the given <em>cell</em>.</p>
+<p><strong>Syntax: <em>grid</em> neighbors <em>i j</em> ?-flat|-pairs?</strong></p>
+<p>Returns a list of the coordinates of the cells that are neighbors of cell <em>i,j</em>.  By default, or
+if <strong>-flat</strong> is given, returns a flat list of the coordinates; if <strong>-pairs</strong> is given, returns a list
+of pairs.</p>
+<pre><code>$ $grid neighbors 5 5
+4 5 6 5 5 4 5 6
+$ $grid neighbors 5 5 -pairs
+{4 5} {6 5} {5 4} {5 6}
+</code></pre>
+<h3><a class="header" href="#grid-path" id="grid-path"><em>grid</em> path</a></h3>
+<hr />
+<p><strong>Syntax: <em>grid</em> path <em>i1 j1 i2 j2</em> ?-flat|-pairs?</strong></p>
+<p>Returns a path from cell <em>i1,j1</em> to cell <em>i2,j2</em> as a list of cell coordinates starting with
+<em>i1,j1</em> and proceeding in order to <em>i2,j2</em>, or the empty list if there is no such path. By
+default, or if <strong>-flat</strong> is given, the list is a flat list of the coordinates of the cells;
+if <strong>-pairs</strong>, the list is a list of pairs.</p>
 <h3><a class="header" href="#grid-render" id="grid-render"><em>grid</em> render</a></h3>
 <hr />
 <p><strong>Syntax: <em>grid</em> render <em>filename</em> ?<em>options...</em>?</strong></p>
@@ -335,19 +359,18 @@ $ $grid linked $cell2 $cell1
 <table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
 <tr><td><strong>-cellwidth <em>chars</em></strong></td><td>A cell's width in monospace characters.  Defaults to 3.</td></tr>
 <tr><td><strong>-autowidth <em>margin</em></strong></td><td>Size cells to the data, leaving a <em>margin</em>.  Defaults to 1.</td></tr>
-<tr><td><strong>-datalist  <em>list</em></strong></td><td>A list of data strings to include in each cell</td></tr>
-<tr><td><strong>-datadict  <em>dict</em></strong></td><td>A dictionary of data strings to include in each cell</td></tr>
+<tr><td><strong>-flat <em>list</em></strong></td><td>A flat list of cell coordinates and data strings to include in each cell</td></tr>
+<tr><td><strong>-pairs <em>dict</em></strong></td><td>A dictionary of data strings by cell coordinate pair</td></tr>
 </tbody></table>
 <p>The caller can provide data to be written into the cells. The data is given in one of two forms:</p>
 <ul>
 <li>
-<p>As a <strong>-datalist</strong>, a list containing one value for each cell in the grid; the list index
-is used as the cell ID.  To leave a cell empty, set the corresponding list item to the empty
-string.</p>
+<p>As a <strong>-flat</strong> list &quot;<em>i1 j1 data1 i2 j2 data2 ...</em>&quot;. To leave a cell empty, omit its data.</p>
 </li>
 <li>
-<p>As a <strong>-datadict</strong>, a dictionary of values by cell ID.  To leave a cell empty, set its value
-to the empty string or omit its ID from the dictionary.</p>
+<p>As a list of <strong>-pairs</strong> and data strings, &quot;{<em>i1 j1</em>} <em>data1</em> {<em>i2 j2</em>} <em>data2</em>...&quot;.  Note that
+this is also a dictionary of data values by coordinate pair.  To leave a cell empty, omit its
+data.</p>
 </li>
 </ul>
 <p>The <strong>-cellwidth</strong> gives the actual width of each cell in monospace characters; if data is
@@ -365,7 +388,7 @@ $ mygrid text
 |           |       |
 +---+---+---+---+---+
 
-$ mygrid text -autowidth 1 -datalist [mygrid distances 0]
+$ mygrid text -autowidth 1 -flat [mygrid distances 0 0]
 +---+---+---+---+---+
 | 0   1   2   3   4 |
 +   +---+---+   +   +
@@ -377,9 +400,9 @@ $
 </code></pre>
 <h3><a class="header" href="#grid-unlink" id="grid-unlink"><em>grid</em> unlink</a></h3>
 <hr />
-<p><strong>Syntax: <em>grid</em> unlink <em>cell1 cell2</em></strong></p>
-<p>Unlinks the two cells (if they were linked).  The two cells must be adjacent.  Note:
-all links are bidirectional; unlinking <em>cell1</em> from <em>cell2</em> also unlinks <em>cell2</em> from <em>cell1</em>.</p>
+<p><strong>Syntax: <em>grid</em> unlink <em>i1 j2 i2 j2</em></strong></p>
+<p>Unlinks the two cells (if they were linked).  The two cells must be neighbors.  Note:
+all links are bidirectional; unlinking <em>i1,j1</em> from <em>i2,j2</em> also unlinks <em>i2,j2</em> from <em>i1,j1</em>.</p>
 <h1><a class="header" href="#image----image-object" id="image----image-object">image -- Image Object</a></h1>
 <p>An image object is a Molt object that wraps an <code>RgbaImage</code> from the
 <a href="https://github.com/image-rs/image"><strong>image</strong> crate</a> and allows it to be manipulated in
