@@ -41,8 +41,7 @@ impl Grid {
         };
 
         for cell in 0..num_cells {
-            let i = grid.i(cell);
-            let j = grid.j(cell);
+            let (i,j) = grid.ij(cell);
 
             let north = if i > 0 {
                 Some(grid.cell(i - 1, j))
@@ -100,18 +99,6 @@ impl Grid {
     pub fn cell(&self, i: usize, j: usize) -> CellID {
         assert!(i < self.num_rows && j < self.num_cols);
         i * self.num_cols + j
-    }
-
-    /// Computes the row index from the cell ID.
-    pub fn i(&self, cell: CellID) -> usize {
-        assert!(self.contains(cell));
-        cell / self.num_cols
-    }
-
-    /// Computes the column index from the cell ID.
-    pub fn j(&self, cell: CellID) -> usize {
-        assert!(self.contains(cell));
-        cell % self.num_cols
     }
 
     /// Computes the row and column indices from the cell ID.
@@ -459,23 +446,6 @@ mod tests {
     }
 
     #[test]
-    fn test_grid_i_j() {
-        let grid = Grid::new(5, 6);
-
-        assert_eq!(grid.i(0), 0);
-        assert_eq!(grid.j(0), 0);
-
-        assert_eq!(grid.i(3), 0);
-        assert_eq!(grid.j(3), 3);
-
-        assert_eq!(grid.i(6), 1);
-        assert_eq!(grid.j(6), 0);
-
-        assert_eq!(grid.i(9), 1);
-        assert_eq!(grid.j(9), 3);
-    }
-
-    #[test]
     fn test_grid_cell_i_j() {
         let grid = Grid::new(5, 6);
 
@@ -483,8 +453,7 @@ mod tests {
             for j in 0..grid.num_cols() {
                 let cell = grid.cell(i, j);
                 assert!(grid.contains(cell));
-                assert_eq!(grid.i(cell), i);
-                assert_eq!(grid.j(cell), j);
+                assert_eq!(grid.ij(cell), (i,j));
             }
         }
     }
