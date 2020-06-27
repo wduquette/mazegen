@@ -1,6 +1,6 @@
 //! This module defines Grid, a rectilinear Grid for building mazes with.
 
-use crate::Cell;
+use crate::CellID;
 use crate::GridDirection;
 use crate::ImageGridRenderer;
 use crate::TextGridRenderer;
@@ -97,25 +97,25 @@ impl Grid {
     }
 
     /// Computes the cell from the row and column.
-    pub fn cell(&self, i: usize, j: usize) -> Cell {
+    pub fn cell(&self, i: usize, j: usize) -> CellID {
         assert!(i < self.num_rows && j < self.num_cols);
         i * self.num_cols + j
     }
 
     /// Computes the row index from the cell ID.
-    pub fn i(&self, cell: Cell) -> usize {
+    pub fn i(&self, cell: CellID) -> usize {
         assert!(self.contains(cell));
         cell / self.num_cols
     }
 
     /// Computes the column index from the cell ID.
-    pub fn j(&self, cell: Cell) -> usize {
+    pub fn j(&self, cell: CellID) -> usize {
         assert!(self.contains(cell));
         cell % self.num_cols
     }
 
     /// Computes the row and column indices from the cell ID.
-    pub fn ij(&self, cell: Cell) -> (usize, usize) {
+    pub fn ij(&self, cell: CellID) -> (usize, usize) {
         assert!(self.contains(cell));
         (cell / self.num_cols, cell % self.num_cols)
     }
@@ -124,7 +124,7 @@ impl Grid {
     // TODO: The linked cells should always be adjacent; but this implementation doesn't
     // require it.  Later in the book, the author talks about "braiding"; possibly,
     // braiding involves non-adjacent links.  If not, an assertion should be put in.
-    pub fn link(&mut self, cell1: Cell, cell2: Cell) {
+    pub fn link(&mut self, cell1: CellID, cell2: CellID) {
         assert!(self.contains(cell1));
         assert!(self.contains(cell2));
 
@@ -133,19 +133,19 @@ impl Grid {
     }
 
     // Unlinks cell 1 from cell 2
-    pub fn unlink(&mut self, cell1: Cell, cell2: Cell) {
+    pub fn unlink(&mut self, cell1: CellID, cell2: CellID) {
         self.cells[cell1].unlink(cell2);
         self.cells[cell2].unlink(cell1);
     }
 
     // Gets the cells linked to this cell
-    pub fn links(&self, cell: Cell) -> Vec<Cell> {
+    pub fn links(&self, cell: CellID) -> Vec<CellID> {
         assert!(self.contains(cell));
         self.cells[cell].links.iter().copied().collect()
     }
 
     // Indicates whether or not the cells are linked
-    pub fn is_linked(&self, cell1: Cell, cell2: Cell) -> bool {
+    pub fn is_linked(&self, cell1: CellID, cell2: CellID) -> bool {
         assert!(self.contains(cell1));
         assert!(self.contains(cell2));
 
@@ -153,7 +153,7 @@ impl Grid {
     }
 
     // Indicates whether or not the cells are linked
-    pub fn is_linked_to(&self, cell: Cell, dir: GridDirection) -> bool {
+    pub fn is_linked_to(&self, cell: CellID, dir: GridDirection) -> bool {
         match dir {
             GridDirection::North => self.is_linked_north(cell),
             GridDirection::South => self.is_linked_south(cell),
@@ -163,19 +163,19 @@ impl Grid {
     }
 
     // Gets the neighbors to the north, south, east, and west of this cell.
-    pub fn neighbors(&self, cell: Cell) -> Vec<Cell> {
+    pub fn neighbors(&self, cell: CellID) -> Vec<CellID> {
         assert!(self.contains(cell));
         self.cells[cell].neighbors()
     }
 
     /// Does the grid contain the location?
-    pub fn contains(&self, cell: Cell) -> bool {
+    pub fn contains(&self, cell: CellID) -> bool {
         // NOTE: No need to check against zero, since we're using an unsigned type.
         cell < self.num_cells
     }
 
     /// Gets the cell to the given direction, if any.
-    pub fn cell_to(&self, cell: Cell, dir: GridDirection) -> Option<Cell> {
+    pub fn cell_to(&self, cell: CellID, dir: GridDirection) -> Option<CellID> {
         match dir {
             GridDirection::North => self.north_of(cell),
             GridDirection::South => self.south_of(cell),
@@ -185,32 +185,32 @@ impl Grid {
     }
 
     /// Gets the cell to the north, if any.
-    pub fn north_of(&self, cell: Cell) -> Option<Cell> {
+    pub fn north_of(&self, cell: CellID) -> Option<CellID> {
         assert!(self.contains(cell));
         self.cells[cell].north
     }
 
     /// Gets the cell to the south, if any.
-    pub fn south_of(&self, cell: Cell) -> Option<Cell> {
+    pub fn south_of(&self, cell: CellID) -> Option<CellID> {
         assert!(self.contains(cell));
         self.cells[cell].south
     }
 
     /// Gets the cell to the east, if any.
-    pub fn east_of(&self, cell: Cell) -> Option<Cell> {
+    pub fn east_of(&self, cell: CellID) -> Option<CellID> {
         assert!(self.contains(cell));
         self.cells[cell].east
     }
 
     /// Gets the cell to the west, if any.
-    pub fn west_of(&self, cell: Cell) -> Option<Cell> {
+    pub fn west_of(&self, cell: CellID) -> Option<CellID> {
         assert!(self.contains(cell));
         self.cells[cell].west
     }
 
     /// Indicates whether this cell is linked to the cell to its north.
     /// Returns false if there is no cell to the north.
-    pub fn is_linked_north(&self, cell: Cell) -> bool {
+    pub fn is_linked_north(&self, cell: CellID) -> bool {
         assert!(self.contains(cell));
         if let Some(other) = self.cells[cell].north {
             self.cells[cell].links.contains(&other)
@@ -221,7 +221,7 @@ impl Grid {
 
     /// Indicates whether this cell is linked to the cell to its south.
     /// Returns false if there is no cell to the south.
-    pub fn is_linked_south(&self, cell: Cell) -> bool {
+    pub fn is_linked_south(&self, cell: CellID) -> bool {
         assert!(self.contains(cell));
         if let Some(other) = self.cells[cell].south {
             self.cells[cell].links.contains(&other)
@@ -232,7 +232,7 @@ impl Grid {
 
     /// Indicates whether this cell is linked to the cell to its east.
     /// Returns false if there is no cell to the east.
-    pub fn is_linked_east(&self, cell: Cell) -> bool {
+    pub fn is_linked_east(&self, cell: CellID) -> bool {
         assert!(self.contains(cell));
         if let Some(other) = self.cells[cell].east {
             self.cells[cell].links.contains(&other)
@@ -243,7 +243,7 @@ impl Grid {
 
     /// Indicates whether this cell is linked to the cell to its west.
     /// Returns false if there is no cell to the west.
-    pub fn is_linked_west(&self, cell: Cell) -> bool {
+    pub fn is_linked_west(&self, cell: CellID) -> bool {
         assert!(self.contains(cell));
         if let Some(other) = self.cells[cell].west {
             self.cells[cell].links.contains(&other)
@@ -261,7 +261,7 @@ impl Grid {
 
     /// Computes the shortest distance from the cell to each other cell.
     /// Returns the distances as a vector of length `num_cells`.
-    pub fn distances(&self, cell: Cell) -> Vec<Option<usize>> {
+    pub fn distances(&self, cell: CellID) -> Vec<Option<usize>> {
         // FIRST, create a working vector.  Initially, no distances are computed.
         let mut dists = Vec::<Option<usize>>::with_capacity(self.num_cells());
 
@@ -295,7 +295,7 @@ impl Grid {
 
     /// Computes the shortest path from the first cell to the second, returning the path
     /// as a vector of cells.  If there is no path, the vector will be empty.
-    pub fn shortest_path(&self, start: Cell, goal: Cell) -> Vec<Cell> {
+    pub fn shortest_path(&self, start: CellID, goal: CellID) -> Vec<CellID> {
         // FIRST, compute distances from the starting cell.
         let dists = self.distances(start);
 
@@ -333,7 +333,7 @@ impl Grid {
     }
 
     /// Return the farthest cell from the given cell.
-    pub fn farthest(&self, start: Cell) -> Cell {
+    pub fn farthest(&self, start: CellID) -> CellID {
         // Get distances from upper left corner
         let dists = self.distances(start);
 
@@ -354,7 +354,7 @@ impl Grid {
 
     /// Get a list of the dead-end cells in the grid: those cells that link to
     /// only one other cell
-    pub fn dead_ends(&self) -> Vec<Cell> {
+    pub fn dead_ends(&self) -> Vec<CellID> {
         (0..self.num_cells)
             .filter(|c| self.links(*c).len() == 1)
             .collect()
@@ -364,7 +364,7 @@ impl Grid {
     ///
     /// TODO: This could be more efficient, since we end up computing the distances more often
     /// than is really necessary.
-    pub fn longest_path(&self) -> Vec<Cell> {
+    pub fn longest_path(&self) -> Vec<CellID> {
         let end = self.farthest(0);
         let start = self.farthest(end);
         self.shortest_path(start, end)
@@ -391,26 +391,26 @@ impl Display for Grid {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 struct CellData {
-    cell: Cell,
-    links: HashSet<Cell>,
-    north: Option<Cell>,
-    south: Option<Cell>,
-    east: Option<Cell>,
-    west: Option<Cell>,
+    cell: CellID,
+    links: HashSet<CellID>,
+    north: Option<CellID>,
+    south: Option<CellID>,
+    east: Option<CellID>,
+    west: Option<CellID>,
 }
 
 impl CellData {
     /// Inserts a link to the given
-    fn link(&mut self, other: Cell) {
+    fn link(&mut self, other: CellID) {
         self.links.insert(other);
     }
 
     /// Removes a link to the given cell
-    fn unlink(&mut self, other: Cell) {
+    fn unlink(&mut self, other: CellID) {
         self.links.remove(&other);
     }
 
-    fn neighbors(&self) -> Vec<Cell> {
+    fn neighbors(&self) -> Vec<CellID> {
         let mut vec = Vec::new();
 
         if let Some(cell) = self.north {

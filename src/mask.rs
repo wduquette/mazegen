@@ -5,7 +5,7 @@
 //! * Could define a matrix trait, to be shared with Grid.
 
 
-use crate::Cell;
+use crate::CellID;
 use crate::sample;
 use std::ops::Index;
 use std::ops::IndexMut;
@@ -56,13 +56,13 @@ impl Mask {
     }
 
     /// Computes the cell from the row and column.
-    fn cell(&self, (i,j): (usize,usize)) -> Cell {
+    fn cell(&self, (i,j): (usize,usize)) -> CellID {
         assert!(i < self.num_rows && j < self.num_cols);
         i * self.num_cols + j
     }
 
     /// Computes the row and column indices from the cell ID.
-    fn ij(&self, cell: Cell) -> (usize,usize) {
+    fn ij(&self, cell: CellID) -> (usize,usize) {
         assert!(cell < self.num_cells);
         (cell / self.num_cols, cell % self.num_cols)
     }

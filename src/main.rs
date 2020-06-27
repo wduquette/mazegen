@@ -1,5 +1,5 @@
 use mazegen::molt_grid::make_grid_object;
-use mazegen::Cell;
+use mazegen::CellID;
 use mazegen::Grid;
 use mazegen::ImageGridRenderer;
 use mazegen::TextGridRenderer;
@@ -65,7 +65,7 @@ fn cmd_doit(_interp: &mut Interp, _: ContextID, argv: &[Value]) -> MoltResult {
     }));
 
     // NEXT, render the path
-    let distpath: HashMap<Cell, usize> =
+    let distpath: HashMap<CellID, usize> =
         cellpath.iter().map(|c| (*c, dists[*c].unwrap())).collect();
 
     out.push_str("\nPath, from start to finish:\n");

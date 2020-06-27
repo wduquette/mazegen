@@ -1,5 +1,5 @@
 //! Molt Grid Commands
-use crate::Cell;
+use crate::CellID;
 use crate::Grid;
 use crate::GridDirection;
 use crate::ImageGridRenderer;
@@ -496,7 +496,7 @@ fn get_grid_col(grid: &Grid, arg: &Value) -> Result<usize, Exception> {
 }
 
 /// Returns a list of cells as either a -flat or a -pairs list
-fn list_of_cells(grid: &Grid, cells: &[Cell], kind: Coord) -> MoltList {
+fn list_of_cells(grid: &Grid, cells: &[CellID], kind: Coord) -> MoltList {
     match kind {
         Coord::Flat => flat_list_of_coords(grid, cells),
         Coord::Pair => list_of_coord_pairs(grid, cells),
@@ -504,7 +504,7 @@ fn list_of_cells(grid: &Grid, cells: &[Cell], kind: Coord) -> MoltList {
 }
 
 /// returns a -flat list of cell coordinates
-fn flat_list_of_coords(grid: &Grid, cells: &[Cell]) -> MoltList {
+fn flat_list_of_coords(grid: &Grid, cells: &[CellID]) -> MoltList {
     let mut list = Vec::new();
 
     for cell in cells {
@@ -517,7 +517,7 @@ fn flat_list_of_coords(grid: &Grid, cells: &[Cell]) -> MoltList {
 }
 
 /// returns a -pairs list of cell coordinates
-fn list_of_coord_pairs(grid: &Grid, cells: &[Cell]) -> MoltList {
+fn list_of_coord_pairs(grid: &Grid, cells: &[CellID]) -> MoltList {
     let mut list = Vec::new();
 
     for cell in cells {

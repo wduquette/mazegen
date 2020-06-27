@@ -1,5 +1,5 @@
 use crate::grid::Grid;
-use crate::Cell;
+use crate::CellID;
 use std::collections::HashMap;
 use std::fmt::Display;
 
@@ -51,18 +51,21 @@ impl TextGridRenderer {
     /// corresponding cell.  `data` must be empty or have a length of `num_cells`.
     pub fn render_with<F, T>(&self, grid: &Grid, f: F) -> String
     where
-        F: Fn(Cell) -> Option<T>,
+        F: Fn(CellID) -> Option<T>,
         T: Display,
     {
         // FIRST, compute the labels and the max label width.
         let mut labwidth = 0;
         let mut labels = HashMap::new();
 
-        for c in 0..grid.num_cells() {
-            if let Some(val) = f(c) {
-                let label = val.to_string();
-                labwidth = std::cmp::max(labwidth, label.chars().count());
-                labels.insert(c, label);
+        for i in 0..grid.num_rows() {
+            for j in 0..grid.num_cols() {
+                let c = grid.cell(i,j);
+                if let Some(val) = f(c) {
+                    let label = val.to_string();
+                    labwidth = std::cmp::max(labwidth, label.chars().count());
+                    labels.insert(c, label);
+                }
             }
         }
 

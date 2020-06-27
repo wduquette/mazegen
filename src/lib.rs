@@ -23,7 +23,7 @@ mod text_grid_renderer;
 /// A unique integer ID for each cell in a grid.  Each grid type will provide a conversion between
 /// the cell ID and whatever more natural indexing scheme exists for that type.  For example,
 /// `Grid` provides a conversion between Cells and (i,j) row/column pairs.
-pub type Cell = usize;
+pub type CellID = usize;
 
 /// Algorithm to produce a Grid containing a binary-tree maze
 pub fn binary_tree_maze(grid: &mut Grid) {
@@ -79,10 +79,10 @@ pub fn hunt_and_kill(grid: &mut Grid) {
     grid.clear();
 
     // FIRST, Pick a random starting point.
-    let mut current: Cell = thread_rng().gen_range(0, grid.num_cells());
+    let mut current: CellID = thread_rng().gen_range(0, grid.num_cells());
 
     while current != grid.num_cells() {
-        let unvisited_neighbors: Vec<Cell> = grid
+        let unvisited_neighbors: Vec<CellID> = grid
             .neighbors(current)
             .into_iter()
             .filter(|c| grid.links(*c).is_empty())
@@ -99,7 +99,7 @@ pub fn hunt_and_kill(grid: &mut Grid) {
 
             // Hunter Block
             for cell in 0..grid.num_cells() {
-                let visited_neighbors: Vec<Cell> = grid
+                let visited_neighbors: Vec<CellID> = grid
                     .neighbors(cell)
                     .into_iter()
                     .filter(|c| !grid.links(*c).is_empty())
@@ -121,10 +121,10 @@ pub fn recursive_backtracker(grid: &mut Grid) {
     grid.clear();
 
     // FIRST, pick a random starting point.
-    let mut current: Cell = thread_rng().gen_range(0, grid.num_cells());
+    let mut current: CellID = thread_rng().gen_range(0, grid.num_cells());
 
     // NEXT, create the stack to control execution.
-    let mut stack: Vec<Cell> = Vec::new();
+    let mut stack: Vec<CellID> = Vec::new();
 
     stack.push(current);
 
@@ -133,7 +133,7 @@ pub fn recursive_backtracker(grid: &mut Grid) {
         current = stack.last().copied().expect("non-empty stack");
 
         // Get all neighbors of the current cell that have no links.
-        let neighbors: Vec<Cell> = grid
+        let neighbors: Vec<CellID> = grid
             .neighbors(current)
             .into_iter()
             .filter(|n| grid.links(*n).is_empty())

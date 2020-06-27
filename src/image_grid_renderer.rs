@@ -1,5 +1,5 @@
 use crate::grid::Grid;
-use crate::Cell;
+use crate::CellID;
 use image::ImageBuffer;
 use image::RgbaImage;
 
@@ -74,7 +74,7 @@ impl ImageGridRenderer {
     #[allow(clippy::cognitive_complexity)]
     pub fn render_with<F>(&self, grid: &Grid, f: F) -> RgbaImage
     where
-        F: Fn(Cell) -> Option<i64>,
+        F: Fn(CellID) -> Option<i64>,
     {
         // FIRST, size and create the image
         let nr = grid.num_rows() as u32;
@@ -96,10 +96,13 @@ impl ImageGridRenderer {
         let mut data_max = std::i64::MIN;
         let mut range: f64 = 0.0;
 
-        for c in 0..grid.num_cells() {
-            if let Some(val) = f(c) {
-                data_min = std::cmp::min(val, data_min);
-                data_max = std::cmp::max(val, data_min);
+        for i in 0..grid.num_rows() {
+            for j in 0..grid.num_cols() {
+                let c = grid.cell(i,j);
+                if let Some(val) = f(c) {
+                    data_min = std::cmp::min(val, data_min);
+                    data_max = std::cmp::max(val, data_min);
+                }
             }
         }
 
