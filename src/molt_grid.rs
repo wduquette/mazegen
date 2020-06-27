@@ -386,13 +386,7 @@ fn obj_grid_text(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
     let opt_args = &argv[2..argv.len()];
     let mut queue = opt_args.iter();
 
-    enum Data {
-        None,
-        List(Value),
-        Dict(Value),
-    };
-
-    let mut data = Data::None;
+    let mut data = None;
 
     while let Some(opt) = queue.next() {
         let val = if let Some(opt_val) = queue.next() {
@@ -416,16 +410,22 @@ fn obj_grid_text(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
                 }
                 renderer.auto_width(margin as usize);
             }
-            "-datalist" => {
+            "-flat" => {
                 let list = val.as_list()?;
-                if list.len() != grid.num_cells() {
-                    return molt_err!("invalid -datalist, expected {} items", grid.num_cells());
+                if list.len() % 3 != 0 {
+                    return molt_err!("invalid -flat list, except flat of list of \"i j data\" triples");
                 }
-                data = Data::List(val.clone());
+                // Make a MoltDict from {i1 j1 val1...}
+                let mut dict = molt::dict::dict_new();
+                for idx in (0..list.len()).step_by(3) {
+                    let c = (list[idx].as_int()? as usize, list[idx+1].as_int()? as usize);
+                    let d = list[idx+2].clone();
+                    dict.insert(Value::from(pair(c)), d);
+                }
+                data = Some(Value::from(dict));
             }
-            "-datadict" => {
-                let _ = val.as_dict()?; // Just verify that it's a valid dict.
-                data = Data::Dict(val.clone());
+            "-pairs" => {
+                data = Some(val.clone());
             }
             _ => {
                 return molt_err!("invalid option: \"{}\"", opt);
@@ -434,15 +434,11 @@ fn obj_grid_text(interp: &mut Interp, ctx: ContextID, argv: &[Value]) -> MoltRes
     }
 
     match data {
-        Data::None => molt_ok!(renderer.render(&grid)),
-        Data::List(val) => {
-            let list = val.as_list()?; // Already has list type.
-            molt_ok!(renderer.render_with(&grid, |c| Some(list[c].as_str())))
-        }
-        Data::Dict(val) => {
-            let dict = val.as_dict()?; // Already has dict type.
+        None => molt_ok!(renderer.render(&grid)),
+        Some(val) => {
+            let dict = val.as_dict()?;
             molt_ok!(renderer.render_with(&grid, |c| dict
-                .get(&Value::from(c as MoltInt))
+                .get(&Value::from(pair(grid.ij(c))))
                 .map(|v| v.as_str())))
         }
     }
@@ -529,6 +525,7 @@ fn list_of_coord_pairs(grid: &Grid, cells: &[CellID]) -> MoltList {
     list
 }
 
+/// Converts an i,j pair to a MoltList {i j}.
 fn pair((i,j): (usize,usize)) -> MoltList {
     vec![Value::from(i as MoltInt), Value::from(j as MoltInt)]
 }

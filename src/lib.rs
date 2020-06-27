@@ -23,7 +23,12 @@ mod text_grid_renderer;
 /// A unique integer ID for each cell in a grid.  Each grid type will provide a conversion between
 /// the cell ID and whatever more natural indexing scheme exists for that type.  For example,
 /// `Grid` provides a conversion between Cells and (i,j) row/column pairs.
+///
+/// **Note**: This should become private to Grid and Mask; it's an implementation detail.
 pub type CellID = usize;
+
+/// An (i,j) pair indexing a cell.
+pub type Cell = (usize,usize);
 
 /// Algorithm to produce a Grid containing a binary-tree maze
 pub fn binary_tree_maze(grid: &mut Grid) {
